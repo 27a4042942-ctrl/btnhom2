@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <title>DoraemonBook – Mua Sách Online</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: Arial, sans-serif; font-size: 13px; color: #333; background: #f5f5f5; }
+    a { text-decoration: none; color: inherit; }
+    img { display: block; max-width: 100%; }
+    :root { --primary: #1a237e; --accent: #e53935; }
+    .header { background: var(--primary); }
+    .header-top { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; gap: 12px; padding: 8px 14px; }
+    .logo { color: white; font-size: 22px; font-weight: bold; white-space: nowrap; }
+    .logo span { color: #ffeb3b; }
+    .search-wrap { flex: 1; position: relative; }
+    .search-box { display: flex; }
+    .search-box input { flex: 1; padding: 7px 12px; border: none; border-radius: 3px 0 0 3px; font-size: 13px; outline: none; }
+    .search-box button { background: #e53935; color: white; border: none; padding: 7px 16px; border-radius: 0 3px 3px 0; cursor: pointer; font-size: 14px; }
+    .search-result { position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #ddd; border-top: none; z-index: 9999; display: none; box-shadow: 0 4px 12px rgba(0,0,0,0.15); max-height: 320px; overflow-y: auto; }
+    .search-result.show { display: block; }
+    .sr-item { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-bottom: 1px solid #f0f0f0; cursor: pointer; text-decoration: none; color: inherit; }
+    .sr-item:hover { background: #f5f5ff; }
+    .sr-item img { width: 36px; height: 46px; object-fit: cover; flex-shrink: 0; }
+    .sr-ten { font-size: 12px; font-weight: bold; color: #1a237e; }
+    .sr-gia { font-size: 12px; color: #e53935; font-weight: bold; }
+    .sr-no { padding: 12px; text-align: center; color: #888; }
+    .header-right { display: flex; gap: 14px; color: white; font-size: 12px; }
+    .header-right a { color: white; }
+    .hotline-bar { background: #f0f0f0; border-bottom: 1px solid #ddd; }
+    .hotline-inner { max-width: 1200px; margin: 0 auto; text-align: right; padding: 5px 14px; font-size: 13px; }
+    .hotline-inner strong { color: var(--primary); font-size: 15px; }
+    .main-wrap { max-width: 1200px; margin: 10px auto; padding: 0 14px; display: flex; gap: 10px; }
+    .sidebar { width: 200px; flex-shrink: 0; }
+    .sidebar-title { background: var(--primary); color: white; padding: 8px 12px; font-weight: bold; font-size: 12px; }
+    .sidebar ul { list-style: none; background: white; border: 1px solid #ddd; border-top: none; }
+    .sidebar ul li { border-bottom: 1px solid #f0f0f0; position: relative; }
+    .sidebar ul li > a { display: flex; justify-content: space-between; align-items: center; padding: 7px 12px; font-size: 12px; color: #333; }
+    .sidebar ul li > a:hover, .sidebar ul li.on > a { color: var(--primary); background: #e8eaf6; font-weight: bold; }
+    .submenu { display: none; position: absolute; left: 100%; top: 0; background: white; border: 1px solid #ddd; width: 165px; z-index: 500; box-shadow: 2px 2px 8px rgba(0,0,0,0.1); }
+    .sidebar ul li:hover .submenu { display: block; }
+    .submenu a { display: block; padding: 7px 12px; font-size: 12px; color: #333; border-bottom: 1px solid #f5f5f5; }
+    .submenu a:hover { color: var(--primary); background: #f0f4ff; }
+    .submenu a.active { color: var(--primary); font-weight: bold; background: #e8f0fe; }
+    .content { flex: 1; min-width: 0; }
+    .flash-sale { background: linear-gradient(90deg, var(--primary), #e53935); color: white; padding: 9px 14px; border-radius: 4px; display: flex; align-items: center; gap: 14px; margin-bottom: 10px; }
+    .flash-title { font-size: 13px; font-weight: bold; white-space: nowrap; }
+    .countdown { display: flex; gap: 4px; }
+    .cd-box { background: white; color: var(--primary); font-weight: bold; padding: 3px 7px; border-radius: 3px; font-size: 14px; min-width: 30px; text-align: center; }
+    .cd-sep { color: white; font-size: 14px; font-weight: bold; line-height: 26px; }
+    .flash-desc { font-size: 12px; opacity: 0.9; }
+
+    /* ── BANNER MỚI – ảnh thật ── */
+    .banner-wrap { position: relative; overflow: hidden; border-radius: 6px; margin-bottom: 10px; height: 240px; background: #111; }
+    .banner-slides { display: flex; transition: transform 0.55s cubic-bezier(.4,0,.2,1); height: 100%; }
+    .banner-slide { min-width: 100%; height: 240px; position: relative; flex-shrink: 0; overflow: hidden; }
+    .banner-slide img { width: 100%; height: 100%; object-fit: cover; display: block; filter: brightness(0.62); transition: transform 6s ease; }
+    .banner-slide.active img { transform: scale(1.06); }
+    .banner-overlay { position: absolute; inset: 0; display: flex; align-items: center; padding: 0 60px; }
+    .banner-books { display: flex; gap: 14px; align-items: flex-end; margin-right: 28px; flex-shrink: 0; }
+    .banner-books img { height: 160px; width: auto; object-fit: cover; border-radius: 4px; box-shadow: 0 8px 24px rgba(0,0,0,0.5); border: 2px solid rgba(255,255,255,0.2); transition: transform .3s; }
+    .banner-books img:hover { transform: translateY(-4px); }
+    .banner-text { color: white; }
+    .banner-text .cat-tag { display: inline-block; background: var(--accent); color: white; font-size: 11px; font-weight: bold; padding: 3px 10px; border-radius: 10px; margin-bottom: 8px; letter-spacing: .5px; }
+    .banner-text h2 { font-size: 26px; font-weight: bold; line-height: 1.2; margin-bottom: 8px; text-shadow: 0 2px 8px rgba(0,0,0,0.5); }
+    .banner-text p { font-size: 13px; opacity: 0.85; margin-bottom: 14px; line-height: 1.5; }
+    .banner-text .slide-btn { display: inline-block; background: white; color: var(--primary); padding: 8px 22px; border-radius: 3px; font-size: 12px; font-weight: bold; transition: background .2s; }
+    .banner-text .slide-btn:hover { background: #ffeb3b; }
+    .banner-arrow { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.2); border: none; color: white; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; z-index: 10; transition: background .2s; }
+    .banner-arrow:hover { background: rgba(255,255,255,0.4); }
+    .banner-arrow.l { left: 10px; } .banner-arrow.r { right: 10px; }
+    .banner-dots { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); display: flex; gap: 6px; z-index: 10; }
+    .banner-dots span { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.4); cursor: pointer; transition: background .2s; }
+    .banner-dots span.on { background: white; }
+
+    .sec-head { display: flex; align-items: center; justify-content: space-between; margin: 12px 0 8px; }
+    .sec-label { background: var(--primary); color: white; padding: 4px 14px; font-size: 13px; font-weight: bold; border-radius: 2px; }
+    .sec-more { font-size: 12px; color: #666; }
+    .sec-more:hover { color: var(--primary); text-decoration: underline; }
+    .section-block { display: none; }
+    .section-block.active { display: block; }
+    .sach-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+    .sach-card { background: white; border: 1px solid #e0e0e0; border-radius: 3px; width: calc(25% - 6px); overflow: hidden; position: relative; transition: box-shadow 0.2s; }
+    .sach-card:hover { box-shadow: 0 3px 10px rgba(26,35,126,0.15); }
+    .badge { position: absolute; top: 0; left: 0; z-index: 1; background: #e53935; color: white; font-size: 10px; font-weight: bold; padding: 2px 5px; border-radius: 0 0 4px 0; }
+    .badge-hot { background: #ff6f00; }
+    .badge-new { background: #2e7d32; }
+    .badge-sap { background: #7b1fa2; }
+    .sach-card img { width: 100%; height: 160px; object-fit: cover; }
+    .card-info { padding: 7px 8px 8px; }
+    .card-ten { font-size: 12px; color: #333; height: 30px; overflow: hidden; margin-bottom: 2px; line-height: 1.3; font-weight: bold; }
+    .card-ten a:hover { color: var(--primary); }
+    .card-tg { font-size: 11px; color: var(--primary); margin-bottom: 3px; }
+    .card-meta { font-size: 10px; color: #999; margin-bottom: 3px; }
+    .card-gia { font-size: 13px; font-weight: bold; color: #e53935; }
+    .card-gia-cu { font-size: 11px; color: #999; text-decoration: line-through; }
+    .card-sap-date { font-size: 11px; color: #7b1fa2; font-weight: bold; margin-bottom: 3px; }
+    .footer { background: var(--primary); color: #ccc; margin-top: 16px; }
+    .footer-inner { max-width: 1200px; margin: 0 auto; display: flex; gap: 20px; padding: 20px 14px; }
+    .footer-col { flex: 1; }
+    .footer-col h4 { color: white; font-size: 13px; margin-bottom: 10px; border-bottom: 1px solid #3949ab; padding-bottom: 5px; }
+    .footer-col a, .footer-col p { display: block; font-size: 12px; color: #aab; margin-bottom: 4px; }
+    .footer-col a:hover { color: white; }
+    .footer-col .hl { color: #ffeb3b; font-weight: bold; font-size: 14px; }
+    .footer-bottom { text-align: center; background: #0d1557; padding: 8px; font-size: 12px; color: #888; }
+
+    /* ── JQUERY EFFECT 1: Scroll Reveal ── */
+    .reveal-card { opacity: 0; transform: translateY(28px); transition: none; }
+    .reveal-card.revealed { opacity: 1; transform: translateY(0); transition: opacity 0.5s ease, transform 0.5s ease; }
+
+    /* ── JQUERY EFFECT 2: Back-to-top button ── */
+    #backToTop { display:none; position:fixed; bottom:24px; right:20px; z-index:9999;
+      background:var(--primary); color:white; border:none; border-radius:50%; width:40px; height:40px;
+      font-size:20px; cursor:pointer; box-shadow:0 3px 10px rgba(0,0,0,0.25); }
+    #backToTop:hover { background:#e53935; }
+  </style>
+</head>
+<body>
+<div class="header">
+  <div class="header-top">
+    <div class="logo" style="display:flex;align-items:center;gap:8px;" onclick="location.href='index.html'">
+      <img src="650830418_891706763700614_3812462636294917183_n-removebg-preview.png" alt="Logo" style="height:40px;width:60px;object-fit:contain;" />
+      Doraemon<span>.vn</span>
+    </div>
+    <div class="search-wrap">
+      <div class="search-box">
+        <input type="text" id="searchInput" placeholder="Tìm kiếm sách..." autocomplete="off" />
+        <button onclick="doSearch()">🔍</button>
+      </div>
+      <div class="search-result" id="searchResult"></div>
+    </div>
+    <div class="header-right"><a href="#">Tài khoản ▾</a><a href="#">Giỏ hàng (0) ▾</a></div>
+  </div>
+</div>
+<div class="hotline-bar"><div class="hotline-inner">📞 Hotline: <strong>0979 761 345</strong></div></div>
+
+<div style="background:white;border-bottom:1px solid #eee;padding:6px 0;">
+  <div style="max-width:1200px;margin:0 auto;padding:0 14px;font-size:12px;color:#888;">
+    🏠 Trang chủ
+    <span id="jq-status" style="display:none;background:#e8f5e9;color:#2e7d32;border:1px solid #a5d6a7;border-radius:3px;padding:1px 8px;font-size:11px;font-weight:bold;margin-left:8px;"></span>
+  </div>
+</div>
+
+<div class="main-wrap">
+  <div class="sidebar">
+    <div class="sidebar-title">☰ DANH MỤC SẢN PHẨM</div>
+    <ul>
+      <li class="on">
+        <a href="#">Nổi bật <span>›</span></a>
+        <div class="submenu">
+          <a href="#" id="sm-banchaytrang" onclick="showSection('banchaytrang',this);return false;">Sách bán chạy</a>
+          <a href="#" id="sm-moinhat"      onclick="showSection('moinhat',this);return false;">Sách mới</a>
+          <a href="#" id="sm-sapph"        onclick="showSection('sapph',this);return false;">Sắp phát hành</a>
+          <a href="#" id="sm-giamgia"      onclick="showSection('giamgia',this);return false;">Sách giảm giá</a>
+        </div>
+      </li>
+      <li><a href="sachkynang.html">Sách Kỹ Năng Sống</a></li>
+      <li><a href="sachthieunhi.html">Sách Thiếu Nhi</a></li>
+      <li><a href="sachvienthuong.html">Sách Viễn Tưởng</a></li>
+    </ul>
+  </div>
+  <div class="content">
+    <div class="flash-sale">
+      <div class="flash-title">⚡ FLASH SALE – Kết thúc sau:</div>
+      <div class="countdown">
+        <div class="cd-box" id="cd-h">02</div><div class="cd-sep">:</div>
+        <div class="cd-box" id="cd-m">45</div><div class="cd-sep">:</div>
+        <div class="cd-box" id="cd-s">00</div>
+      </div>
+      <div class="flash-desc">Giảm thêm 10% tất cả sách hôm nay!</div>
+    </div>
+
+    <!-- BANNER MỚI – ảnh thật + ảnh bìa sách nổi bật -->
+    <div class="banner-wrap">
+      <div class="banner-slides" id="bannerSlides">
+
+        <!-- Slide 1: Kỹ Năng Sống -->
+        <div class="banner-slide active">
+          <img src="https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=1200&q=80" alt="Kỹ Năng Sống"/>
+          <div class="banner-overlay">
+            <div class="banner-books">
+              <img src="https://tiemsach.org/wp-content/uploads/2023/07/Ebook-Dac-nhan-tam.jpg" alt="Đắc Nhân Tâm"/>
+              <img src="https://jamesclear.com/wp-content/uploads/2019/04/atomicHC-flat-1-e1556572683325.jpg" alt="Atomic Habits"/>
+              <img src="https://sachnoi.top/upload/images/mindset-tam-ly-hoc-thanh-cong-50Zf4.webp" alt="Mindset"/>
+            </div>
+            <div class="banner-text">
+              <span class="cat-tag">📖 KỸ NĂNG SỐNG</span>
+              <h2>Phát triển bản thân<br/>mỗi ngày</h2>
+              <p>Bộ sưu tập sách kỹ năng bestseller<br/>giúp bạn thành công trong cuộc sống</p>
+              <a class="slide-btn" href="sachkynang.html">Xem ngay →</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Slide 2: Thiếu Nhi -->
+        <div class="banner-slide">
+          <img src="https://images.unsplash.com/photo-1512820790803-83ca734da794?w=1200&q=80" alt="Sách Thiếu Nhi"/>
+          <div class="banner-overlay">
+            <div class="banner-books">
+              <img src="https://sachvuii.com/wp-content/uploads/2024/10/iNkARZiAyX.webp" alt="Doraemon"/>
+              <img src="https://tse4.mm.bing.net/th/id/OIP.du_EovpT_Q9hYwf1muaMHAHaKF?pid=Api&P=0&h=180" alt="Nobita"/>
+              <img src="https://tse1.mm.bing.net/th/id/OIP.sud0Zsi0NjPAPM9w735sWAHaHa?pid=Api&P=0&h=180" alt="Doraemon Plus"/>
+            </div>
+            <div class="banner-text">
+              <span class="cat-tag">🐱 THIẾU NHI</span>
+              <h2>Thế giới Doraemon<br/>kỳ diệu</h2>
+              <p>Những câu chuyện về tình bạn,<br/>bảo bối và hành trình phiêu lưu</p>
+              <a class="slide-btn" href="sachthieunhi.html">Xem ngay →</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Slide 3: Viễn Tưởng -->
+        <div class="banner-slide">
+          <img src="https://images.unsplash.com/photo-1462331940025-496dfbfc7564?w=1200&q=80" alt="Sách Viễn Tưởng"/>
+          <div class="banner-overlay">
+            <div class="banner-books">
+              <img src="https://bizweb.dktcdn.net/100/180/408/products/xu-cat-01-94ed06ca-c6ce-4bad-bf1b-b26dd155aeda-effa208e-ef6d-429a-9655-b5952f46de3e.jpg?v=1638598294267" alt="Dune"/>
+              <img src="https://strangerthansf.com/scans/asimov-foundation.jpg" alt="Foundation"/>
+              <img src="https://tse4.mm.bing.net/th/id/OIP.Og8IPTwsuYG8j2iMOmcF_gHaLU?pid=Api&P=0&h=180" alt="1984"/>
+            </div>
+            <div class="banner-text">
+              <span class="cat-tag">🚀 VIỄN TƯỞNG</span>
+              <h2>Khám phá vũ trụ<br/>qua từng trang sách</h2>
+              <p>Những tác phẩm sci-fi kinh điển<br/>đưa bạn đến những thế giới xa xôi</p>
+              <a class="slide-btn" href="sachvienthuong.html">Xem ngay →</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Slide 4: Flash Sale -->
+        <div class="banner-slide">
+          <img src="https://images.unsplash.com/photo-1507842217343-583bb7270b66?w=1200&q=80" alt="Flash Sale"/>
+          <div class="banner-overlay">
+            <div class="banner-books">
+              <img src="https://lzd-img-global.slatic.net/g/p/3f6ae6f3de8aaf9f354c4c5096a9d96a.png_720x720q80.png" alt="Người Giàu Nhất"/>
+              <img src="https://2.bp.blogspot.com/-fcZcxIJJrrM/WS1FoqI1YtI/AAAAAAAAG1Y/29WI2jDcRHkYcvJYm1F8E7-wJlUDlyWLwCLcB/s1600/the7habits.u5131.d20170407.t115643.302250.jpg" alt="7 Thói Quen"/>
+              <img src="https://bizweb.dktcdn.net/100/180/408/products/xu-cat-01-94ed06ca-c6ce-4bad-bf1b-b26dd155aeda-effa208e-ef6d-429a-9655-b5952f46de3e.jpg?v=1638598294267" alt="Dune"/>
+            </div>
+            <div class="banner-text">
+              <span class="cat-tag" style="background:#ff6f00;">🔥 FLASH SALE</span>
+              <h2>Giảm đến 25%<br/>hôm nay thôi!</h2>
+              <p>Hàng trăm đầu sách ưu đãi lớn<br/>Số lượng có hạn – Mua ngay!</p>
+              <a class="slide-btn" href="sachkynang.html">Mua ngay →</a>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <button class="banner-arrow l" onclick="slidePrev()">&#8249;</button>
+      <button class="banner-arrow r" onclick="slideNext()">&#8250;</button>
+      <div class="banner-dots">
+        <span class="on" onclick="goSlide(0)"></span>
+        <span onclick="goSlide(1)"></span>
+        <span onclick="goSlide(2)"></span>
+        <span onclick="goSlide(3)"></span>
+      </div>
+    </div>
+
+    <div class="section-block active" id="sec-banchaytrang">
+      <div class="sec-head"><div class="sec-label">🔥 Sách Bán Chạy</div><a class="sec-more" href="sachkynang.html">Xem tất cả</a></div>
+      <div class="sach-grid" id="gridBanChay"></div>
+    </div>
+    <div class="section-block" id="sec-moinhat">
+      <div class="sec-head"><div class="sec-label">🆕 Sách Mới Nhất (2026)</div><a class="sec-more" href="sachkynang.html">Xem tất cả</a></div>
+      <div class="sach-grid" id="gridMoi"></div>
+    </div>
+    <div class="section-block" id="sec-sapph">
+      <div class="sec-head"><div class="sec-label">📅 Sắp Phát Hành</div><a class="sec-more" href="#">Xem tất cả</a></div>
+      <div class="sach-grid" id="gridSap"></div>
+    </div>
+    <div class="section-block" id="sec-giamgia">
+      <div class="sec-head"><div class="sec-label">🏷️ Sách Giảm Giá</div><a class="sec-more" href="sachkynang.html">Xem tất cả</a></div>
+      <div class="sach-grid" id="gridGiam"></div>
+    </div>
+  </div>
+</div>
+<div class="footer">
+  <div class="footer-inner">
+    <div class="footer-col"><h4>Hỗ Trợ Khách Hàng</h4><p>Email: 27a4042961@hvnh.edu.vn</p><p class="hl">Hotline: 0979 761 345</p><p>Zalo: 0979 761 345</p></div>
+    <div class="footer-col"><h4>Danh Mục</h4><a href="sachkynang.html">Sách Kỹ Năng</a><a href="sachthieunhi.html">Sách Thiếu Nhi</a><a href="sachvienthuong.html">Sách Viễn Tưởng</a></div>
+    <div class="footer-col"><h4>Tài Khoản</h4><a href="#">Đăng nhập</a><a href="#">Đăng ký</a></div>
+    <div class="footer-col"><h4>Hướng Dẫn</h4><a href="#">Hướng dẫn mua hàng</a><a href="#">Chính sách vận chuyển</a><a href="#">Câu hỏi thường gặp</a></div>
+  </div>
+  <div class="footer-bottom">Copyright © 2025 DoraemonBook | Địa chỉ: 123 Trường Chinh</div>
+</div>
+<!-- JQUERY EFFECTS -->
+<button id="backToTop" title="Lên đầu trang">▲</button>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script>
+  // Hiển thị nhãn jQuery đang chạy
+$(document).ready(function(){
+  $('#jq-status').text('⚡ jQuery '+$.fn.jquery+' đang chạy').show();
+});
+// ── EFFECT 1: Scroll Reveal – các thẻ sách fade-in khi hiện ra ──
+function applyReveal() {
+  $('.sach-card').each(function(i) {
+    var $el = $(this);
+    if ($el.hasClass('reveal-card')) return;
+    $el.addClass('reveal-card');
+    // stagger delay
+    var delay = (i % 4) * 80;
+    setTimeout(function() {
+      var top = $el.offset().top;
+      if (top < $(window).scrollTop() + $(window).height() + 60) {
+        $el.addClass('revealed');
+      }
+    }, delay);
+  });
+}
+$(window).on('scroll', function() {
+  $('.reveal-card:not(.revealed)').each(function() {
+    if ($(this).offset().top < $(window).scrollTop() + $(window).height() + 60) {
+      $(this).addClass('revealed');
+    }
+  });
+});
+
+// ── EFFECT 2: Back-to-top button ──
+$(window).on('scroll', function() {
+  if ($(this).scrollTop() > 300) { $('#backToTop').fadeIn(200); }
+  else { $('#backToTop').fadeOut(200); }
+});
+$('#backToTop').on('click', function() {
+  $('html, body').animate({ scrollTop: 0 }, 400);
+});
+</script>
+<script>
+var SACHS = [
+  {id:1,  ten:"Đắc Nhân Tâm",                 tg:"Dale Carnegie",    gia:68000,  giaCu:85000,  img:"https://tiemsach.org/wp-content/uploads/2023/07/Ebook-Dac-nhan-tam.jpg",                                                                                                                                                                          the:"kynang",    link:"doraemonbook.html#dac-nhan-tam",        luotMua:1850, ngayXB:new Date(2026,1,10)},
+  {id:2,  ten:"Atomic Habits",                 tg:"James Clear",      gia:105000, giaCu:130000, img:"https://jamesclear.com/wp-content/uploads/2019/04/atomicHC-flat-1-e1556572683325.jpg",                                                                                                                                                           the:"kynang",    link:"doraemonbook.html#atomic-habits",        luotMua:1620, ngayXB:new Date(2026,0,5)},
+  {id:3,  ten:"7 Thói Quen Người Thành Đạt",  tg:"Stephen R. Covey", gia:110000, giaCu:138000, img:"https://2.bp.blogspot.com/-fcZcxIJJrrM/WS1FoqI1YtI/AAAAAAAAG1Y/29WI2jDcRHkYcvJYm1F8E7-wJlUDlyWLwCLcB/s1600/the7habits.u5131.d20170407.t115643.302250.jpg",                                                                                   the:"kynang",    link:"doraemonbook.html#7-thoi-quen",         luotMua:980,  ngayXB:new Date(2025,5,20)},
+  {id:4,  ten:"Mindset – Tư Duy Thành Công",  tg:"Carol S. Dweck",   gia:88000,  giaCu:110000, img:"https://sachnoi.top/upload/images/mindset-tam-ly-hoc-thanh-cong-50Zf4.webp",                                                                                                                                                                     the:"kynang",    link:"doraemonbook.html#mindset",             luotMua:760,  ngayXB:new Date(2025,8,14)},
+  {id:5,  ten:"Người Giàu Nhất Thành Babylon",tg:"George S. Clason", gia:58000,  giaCu:72000,  img:"https://lzd-img-global.slatic.net/g/p/3f6ae6f3de8aaf9f354c4c5096a9d96a.png_720x720q80.png",                                                                                                                                                    the:"kynang",    link:"doraemonbook.html#nguoi-giau-nhat",     luotMua:1340, ngayXB:new Date(2025,11,3)},
+  {id:6,  ten:"Doraemon – Tập 1",              tg:"Fujiko F. Fujio",  gia:25000,  giaCu:30000,  img:"https://sachvuii.com/wp-content/uploads/2024/10/iNkARZiAyX.webp",                                                                                                                                                    the:"thieunhi",  link:"doraemonbook.html#doraemon-tap1",       luotMua:1200, ngayXB:new Date(2026,2,1)},
+  {id:7,  ten:"Nobita Và Chú Khủng Long",      tg:"Fujiko F. Fujio",  gia:48000,  giaCu:60000,  img:"https://tse4.mm.bing.net/th/id/OIP.du_EovpT_Q9hYwf1muaMHAHaKF?pid=Api&P=0&h=180",                                                                                                                     the:"thieunhi",  link:"doraemonbook.html#nobita-khung-long",   luotMua:890,  ngayXB:new Date(2025,7,8)},
+  {id:8,  ten:"Doraemon Plus – Tập 1",         tg:"Fujiko F. Fujio",  gia:28000,  giaCu:35000,  img:"https://tse1.mm.bing.net/th/id/OIP.sud0Zsi0NjPAPM9w735sWAHaHa?pid=Api&P=0&h=180",                                                                                                                              the:"thieunhi",  link:"doraemonbook.html#doraemon-plus-tap1",  luotMua:670,  ngayXB:new Date(2025,3,17)},
+  {id:9,  ten:"Dune – Xứ Cát",                 tg:"Frank Herbert",    gia:145000, giaCu:180000, img:"https://bizweb.dktcdn.net/100/180/408/products/xu-cat-01-94ed06ca-c6ce-4bad-bf1b-b26dd155aeda-effa208e-ef6d-429a-9655-b5952f46de3e.jpg?v=1638598294267",                                                                                        the:"vienthuong",link:"doraemonbook.html#dune",               luotMua:1410, ngayXB:new Date(2026,0,22)},
+  {id:10, ten:"Foundation – Tổ Chức",          tg:"Isaac Asimov",     gia:120000, giaCu:150000, img:"https://strangerthansf.com/scans/asimov-foundation.jpg",                                                                                                                                                                                         the:"vienthuong",link:"doraemonbook.html#foundation",         luotMua:820,  ngayXB:new Date(2025,9,11)},
+  {id:11, ten:"1984",                           tg:"George Orwell",    gia:85000,  giaCu:105000, img:"https://upload.wikimedia.org/wikipedia/commons/c/c3/1984first.jpg",                                                                                                                                                                             the:"vienthuong",link:"doraemonbook.html#1984",               luotMua:940,  ngayXB:new Date(2025,4,30)}
+];
+var SAP = [
+  {ten:"Dám Nghĩ Lớn",         tg:"David J. Schwartz", gia:65000,  giaCu:82000,  img:"https://cungdocsach.vn/wp-content/uploads/2020/09/D%C3%A1m-ngh%C4%A9-l%E1%BB%9Bn.jpg", duKien:"Tháng 4/2026"},
+  {ten:"Tư Duy Nhanh Và Chậm", tg:"Daniel Kahneman",   gia:92000,  giaCu:115000, img:"https://cungdocsach.vn/wp-content/uploads/2020/09/D%C3%A1m-ngh%C4%A9-l%E1%BB%9Bn.jpg", duKien:"Tháng 5/2026"},
+  {ten:"Ender's Game",          tg:"Orson Scott Card",  gia:110000, giaCu:135000, img:"https://images.macmillan.com/folio-assets/macmillan_us_frontbookcovers_1000H/9780765370624.jpg", duKien:"Tháng 4/2026"},
+  {ten:"The Martian",           tg:"Andy Weir",         gia:98000,  giaCu:120000, img:"https://tse1.mm.bing.net/th/id/OIP.R6wRDb6mtV67razl0TKhpQHaK8?pid=Api&P=0&h=180", duKien:"Tháng 6/2026"}
+];
+SACHS.forEach(function(s){ s.namXB=s.ngayXB.getFullYear(); s.giamPct=Math.round((1-s.gia/s.giaCu)*100); s.isMoi=s.namXB===2026; });
+var top4 = SACHS.slice().sort(function(a,b){return b.luotMua-a.luotMua;}).slice(0,4).map(function(s){return s.id;});
+SACHS.forEach(function(s){ s.isBanChay = top4.indexOf(s.id)!==-1; });
+function fmt(n){return n.toLocaleString('vi-VN')+' đ';}
+function fmtDate(d){return d.getDate()+'/'+(d.getMonth()+1)+'/'+d.getFullYear();}
+function renderCard(s){
+  var b=s.isBanChay?'<div class="badge badge-hot">🔥 HOT</div>':s.isMoi?'<div class="badge badge-new">🆕 MỚI</div>':'<div class="badge">-'+s.giamPct+'%</div>';
+  return '<div class="sach-card">'+b+'<a href="'+s.link+'"><img src="'+s.img+'" alt="'+s.ten+'"></a><div class="card-info"><div class="card-ten"><a href="'+s.link+'">'+s.ten+'</a></div><div class="card-tg">'+s.tg+'</div><div class="card-meta">📅 '+fmtDate(s.ngayXB)+' | 🛒 '+s.luotMua.toLocaleString()+' lượt mua</div><div class="card-gia">'+fmt(s.gia)+'</div><div class="card-gia-cu">'+fmt(s.giaCu)+'</div></div></div>';
+}
+function renderSap(s){
+  return '<div class="sach-card"><div class="badge badge-sap">📅 SẮP RA</div><a href="#"><img src="'+s.img+'" alt="'+s.ten+'"></a><div class="card-info"><div class="card-ten"><a href="#">'+s.ten+'</a></div><div class="card-tg">'+s.tg+'</div><div class="card-sap-date">🗓️ Dự kiến: '+s.duKien+'</div><div class="card-gia">'+fmt(s.gia)+'</div><div class="card-gia-cu">'+fmt(s.giaCu)+'</div></div></div>';
+}
+document.getElementById('gridBanChay').innerHTML = SACHS.slice().sort(function(a,b){return b.luotMua-a.luotMua;}).slice(0,4).map(renderCard).join('');
+var moi = SACHS.filter(function(s){return s.isMoi;}).sort(function(a,b){return b.ngayXB-a.ngayXB;});
+document.getElementById('gridMoi').innerHTML = moi.length ? moi.map(renderCard).join('') : '<p style="color:#888;padding:12px;">Chưa có sách mới trong năm 2026.</p>';
+document.getElementById('gridSap').innerHTML = SAP.map(renderSap).join('');
+document.getElementById('gridGiam').innerHTML = SACHS.slice().sort(function(a,b){return b.giamPct-a.giamPct;}).slice(0,4).map(renderCard).join('');
+
+// Gọi scroll reveal sau khi render
+setTimeout(function(){ if(typeof applyReveal==='function') applyReveal(); }, 80);
+
+function showSection(id,el){
+  document.querySelectorAll('.section-block').forEach(function(b){b.classList.remove('active');});
+  var t=document.getElementById('sec-'+id); if(t) t.classList.add('active');
+  document.querySelectorAll('.submenu a').forEach(function(a){a.classList.remove('active');});
+  if(el) el.classList.add('active');
+  setTimeout(function(){ if(typeof applyReveal==='function') applyReveal(); }, 80);
+}
+document.getElementById('sm-banchaytrang').classList.add('active');
+
+// ── BANNER SLIDER ──
+var cur=0, total=4, autoT;
+function updateBanner(){
+  document.getElementById('bannerSlides').style.transform='translateX(-'+(cur*100)+'%)';
+  document.querySelectorAll('.banner-dots span').forEach(function(d,i){d.className=i===cur?'on':'';});
+  document.querySelectorAll('.banner-slide').forEach(function(s,i){s.classList.toggle('active',i===cur);});
+}
+function slideNext(){cur=(cur+1)%total;updateBanner();resetAuto();}
+function slidePrev(){cur=(cur-1+total)%total;updateBanner();resetAuto();}
+function goSlide(n){cur=n;updateBanner();resetAuto();}
+function resetAuto(){clearInterval(autoT);autoT=setInterval(slideNext,4000);}
+resetAuto();
+
+// ── TÌM KIẾM ──
+var inp=document.getElementById('searchInput'),res=document.getElementById('searchResult');
+inp.addEventListener('input',function(){
+  var q=this.value.trim().toLowerCase(); if(!q){res.classList.remove('show');return;}
+  var all=SACHS.concat(SAP.map(function(s){return Object.assign({link:'#'},s);}));
+  var found=all.filter(function(s){return s.ten.toLowerCase().indexOf(q)>=0||s.tg.toLowerCase().indexOf(q)>=0;});
+  res.innerHTML=found.length?found.map(function(s){return '<a class="sr-item" href="'+(s.link||'#')+'"><img src="'+s.img+'" alt="'+s.ten+'"><div><div class="sr-ten">'+s.ten+'</div><div style="font-size:11px;color:#888">'+s.tg+'</div><div class="sr-gia">'+fmt(s.gia)+'</div></div></a>';}).join(''):'<div class="sr-no">Không tìm thấy sách nào</div>';
+  res.classList.add('show');
+});
+document.addEventListener('click',function(e){if(!e.target.closest('.search-wrap'))res.classList.remove('show');});
+function doSearch(){inp.dispatchEvent(new Event('input'));}
+
+// ── COUNTDOWN ──
+var endT=new Date().getTime()+(2*3600+45*60)*1000;
+function tick(){var d=endT-new Date().getTime();if(d<0)d=0;var h=Math.floor(d/3600000),m=Math.floor((d%3600000)/60000),s=Math.floor((d%60000)/1000);document.getElementById('cd-h').textContent=String(h).padStart(2,'0');document.getElementById('cd-m').textContent=String(m).padStart(2,'0');document.getElementById('cd-s').textContent=String(s).padStart(2,'0');}
+tick();setInterval(tick,1000);
+</script>
+</body>
+</html>

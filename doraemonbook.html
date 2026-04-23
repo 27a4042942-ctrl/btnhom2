@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title id="pageTitle">DoraemonBook</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: Arial, sans-serif; font-size: 13px; color: #333; background: #f5f5f5; }
+    a { text-decoration: none; color: inherit; cursor: pointer; }
+    img { display: block; max-width: 100%; }
+    :root { --primary: #1a237e; --accent: #e53935; }
+
+    /* ── HEADER ── */
+    .header { background: var(--primary); }
+    .header-top { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; gap: 12px; padding: 8px 14px; }
+    .logo { color: white; font-size: 22px; font-weight: bold; white-space: nowrap; cursor: pointer; }
+    .logo span { color: #ffeb3b; }
+    .search-wrap { flex: 1; position: relative; }
+    .search-box { display: flex; }
+    .search-box input { flex: 1; padding: 7px 12px; border: none; border-radius: 3px 0 0 3px; font-size: 13px; outline: none; }
+    .search-box button { background: #e53935; color: white; border: none; padding: 7px 16px; border-radius: 0 3px 3px 0; cursor: pointer; }
+    .search-result { position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #ddd; border-top: none; z-index: 9999; display: none; box-shadow: 0 4px 12px rgba(0,0,0,0.15); max-height: 300px; overflow-y: auto; }
+    .search-result.show { display: block; }
+    .sr-item { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-bottom: 1px solid #f0f0f0; cursor: pointer; color: inherit; }
+    .sr-item:hover { background: #f5f5ff; }
+    .sr-item img { width: 36px; height: 46px; object-fit: cover; flex-shrink: 0; }
+    .sr-ten { font-size: 12px; font-weight: bold; color: #1a237e; }
+    .sr-gia { font-size: 12px; color: #e53935; font-weight: bold; }
+    .sr-no { padding: 12px; text-align: center; color: #888; }
+    .header-right { display: flex; gap: 14px; color: white; font-size: 12px; white-space: nowrap; }
+    .header-right a { color: white; }
+    .hotline-bar { background: #f0f0f0; border-bottom: 1px solid #ddd; }
+    .hotline-inner { max-width: 1200px; margin: 0 auto; text-align: right; padding: 5px 14px; font-size: 13px; }
+    .hotline-inner strong { color: var(--primary); font-size: 15px; }
+
+    /* ── BREADCRUMB ── */
+    .breadcrumb-bar { background: white; border-bottom: 1px solid #eee; padding: 6px 0; }
+    .bc-inner { max-width: 1200px; margin: 0 auto; padding: 0 14px; font-size: 12px; color: #888; }
+    .bc-inner a { color: var(--primary); cursor: pointer; }
+    .bc-inner a:hover { text-decoration: underline; }
+
+    /* ── TRANG CHỦ – DANH SÁCH ── */
+    .home-page { max-width: 1200px; margin: 0 auto; padding: 14px; }
+    .section-title { font-size: 16px; font-weight: bold; color: var(--primary); padding-bottom: 8px; border-bottom: 2px solid var(--primary); margin-bottom: 14px; }
+    .filter-tabs { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+    .ftab { padding: 6px 16px; border-radius: 20px; border: 2px solid #ddd; background: white; font-size: 12px; font-weight: bold; color: #888; cursor: pointer; transition: all .18s; }
+    .ftab:hover { border-color: var(--primary); color: var(--primary); }
+    .ftab.active { background: var(--primary); border-color: var(--primary); color: white; }
+
+    .book-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(175px, 1fr)); gap: 14px; }
+    .book-card { background: white; border: 1px solid #ddd; border-radius: 4px; overflow: hidden; cursor: pointer; transition: box-shadow .2s, transform .2s; display: flex; flex-direction: column; }
+    .book-card:hover { box-shadow: 0 6px 20px rgba(0,0,0,0.12); transform: translateY(-3px); }
+    .book-card .card-img { position: relative; height: 210px; overflow: hidden; background: #e8eaf6; }
+    .book-card .card-img img { width: 100%; height: 100%; object-fit: cover; transition: transform .3s; }
+    .book-card:hover .card-img img { transform: scale(1.04); }
+    .card-badge { position: absolute; top: 7px; left: 7px; background: var(--accent); color: white; font-size: 10px; font-weight: bold; padding: 2px 7px; border-radius: 10px; }
+    .card-body { padding: 10px; flex: 1; display: flex; flex-direction: column; gap: 3px; }
+    .card-title { font-size: 13px; font-weight: bold; color: #222; line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .card-author { font-size: 11px; color: #888; }
+    .card-cat { display: inline-block; font-size: 10px; padding: 2px 7px; background: #e8eaf6; color: var(--primary); border-radius: 8px; font-weight: bold; margin-top: 2px; }
+    .card-desc { font-size: 11px; color: #888; line-height: 1.5; margin-top: 4px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .card-footer { padding: 8px 10px 10px; border-top: 1px solid #f0f0f0; display: flex; align-items: center; justify-content: space-between; }
+    .card-price-orig { font-size: 11px; text-decoration: line-through; color: #bbb; }
+    .card-price-sale { font-size: 16px; font-weight: bold; color: var(--accent); }
+    .card-btn { background: var(--primary); color: white; border: none; border-radius: 3px; padding: 6px 12px; font-size: 11px; font-weight: bold; cursor: pointer; transition: background .15s; }
+    .card-btn:hover { background: var(--accent); }
+
+    /* ── TRANG CHI TIẾT ── */
+    .detail-page { max-width: 1200px; margin: 12px auto; padding: 0 14px; }
+    .chitiet-box { background: white; border: 1px solid #ddd; padding: 22px; display: flex; gap: 24px; margin-bottom: 12px; }
+    .anh-col { width: 220px; flex-shrink: 0; }
+    .anh-col img { width: 100%; border: 1px solid #ddd; border-radius: 3px; }
+    .info-col { flex: 1; }
+    .info-col h1 { font-size: 20px; color: #222; margin-bottom: 6px; }
+    .stars { color: #f39c12; font-size: 13px; margin-bottom: 8px; }
+    .stars span { color: #888; font-size: 12px; margin-left: 4px; }
+    .tag-row { display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
+    .tag { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: bold; }
+    .tag-hot { background: #fff3e0; color: #e65100; border: 1px solid #ffcc80; }
+    .tag-new { background: #e8f5e9; color: #1b5e20; border: 1px solid #a5d6a7; }
+    .tag-sale { background: #fce4ec; color: #880e4f; border: 1px solid #f48fb1; }
+    .gia-row { display: flex; align-items: baseline; gap: 10px; margin-bottom: 6px; }
+    .gia-bia-label { font-size: 13px; color: #888; }
+    .gia-bia-so { text-decoration: line-through; color: #aaa; }
+    .tiet-kiem-txt { font-size: 13px; color: var(--accent); font-weight: bold; }
+    .gia-ban { font-size: 28px; font-weight: bold; color: var(--accent); margin-bottom: 12px; }
+    .meta-list { list-style: none; margin-bottom: 10px; }
+    .meta-list li { font-size: 12px; color: #555; padding: 4px 0; border-bottom: 1px solid #f5f5f5; display: flex; gap: 6px; }
+    .meta-list li .lb { width: 140px; flex-shrink: 0; color: #888; }
+    .meta-list li a { color: var(--primary); cursor: pointer; }
+    .meta-list li .highlight { color: var(--accent); font-weight: bold; }
+    .vc-list { list-style: none; margin-bottom: 14px; }
+    .vc-list li { font-size: 12px; color: #555; padding: 3px 0; }
+    .vc-list li::before { content: "✔ "; color: #27ae60; }
+    .btn-dat { display: inline-block; background: var(--accent); color: white; padding: 10px 32px; border-radius: 3px; font-size: 13px; font-weight: bold; margin-right: 8px; cursor: pointer; border: none; }
+    .btn-dat:hover { background: #c62828; }
+    .btn-gio { display: inline-block; background: white; color: var(--primary); border: 2px solid var(--primary); padding: 8px 18px; border-radius: 3px; font-size: 13px; cursor: pointer; }
+    .btn-gio:hover { background: #e8eaf6; }
+    .mota-box { background: white; border: 1px solid #ddd; padding: 18px; margin-bottom: 12px; }
+    .mota-box h2 { font-size: 14px; color: #333; margin-bottom: 12px; padding-bottom: 7px; border-bottom: 2px solid var(--primary); }
+    .mota-box p { font-size: 13px; line-height: 1.75; color: #444; margin-bottom: 9px; }
+    .mota-box ul { padding-left: 18px; font-size: 12px; color: #555; line-height: 2.1; margin-top: 6px; }
+
+    /* ── SÁCH LIÊN QUAN ── */
+    .related-box { background: white; border: 1px solid #ddd; padding: 18px; margin-bottom: 12px; }
+    .related-box h2 { font-size: 14px; color: #333; margin-bottom: 12px; padding-bottom: 7px; border-bottom: 2px solid var(--primary); }
+    .related-grid { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 4px; }
+    .related-card { min-width: 130px; max-width: 130px; border: 1px solid #eee; border-radius: 3px; overflow: hidden; cursor: pointer; transition: box-shadow .18s; flex-shrink: 0; }
+    .related-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.10); }
+    .related-card img { width: 100%; height: 160px; object-fit: cover; }
+    .related-card .rc-body { padding: 7px; }
+    .related-card .rc-title { font-size: 11px; font-weight: bold; color: #222; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .related-card .rc-price { font-size: 12px; color: var(--accent); font-weight: bold; margin-top: 3px; }
+
+    /* ── FOOTER ── */
+    .footer { background: var(--primary); color: #ccc; margin-top: 10px; }
+    .footer-inner { max-width: 1200px; margin: 0 auto; display: flex; gap: 20px; padding: 20px 14px; }
+    .footer-col { flex: 1; }
+    .footer-col h4 { color: white; font-size: 13px; margin-bottom: 10px; border-bottom: 1px solid #3949ab; padding-bottom: 5px; }
+    .footer-col a, .footer-col p { display: block; font-size: 12px; color: #aab; margin-bottom: 4px; cursor: pointer; }
+    .footer-col a:hover { color: white; }
+    .footer-col .hl { color: #ffeb3b; font-weight: bold; font-size: 14px; }
+    .footer-bottom { text-align: center; background: #0d1557; padding: 8px; font-size: 12px; color: #888; }
+
+    .hidden { display: none !important; }
+
+    /* ── JQUERY EFFECT: Lightbox zoom ảnh bìa ── */
+    #jq-lightbox { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.82); z-index:99999;
+      align-items:center; justify-content:center; }
+    #jq-lightbox.active { display:flex; }
+    #jq-lightbox img { max-width:340px; max-height:85vh; border-radius:6px;
+      box-shadow:0 12px 40px rgba(0,0,0,0.6); animation:lbIn .25s ease; }
+    @keyframes lbIn { from{transform:scale(0.8);opacity:0} to{transform:scale(1);opacity:1} }
+    #jq-lightbox-close { position:absolute; top:18px; right:24px; color:white; font-size:30px;
+      cursor:pointer; line-height:1; background:none; border:none; }
+    .anh-col img { cursor:zoom-in; }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-top">
+    <div class="logo" style="display:flex;align-items:center;gap:8px;">
+      <img src="650830418_891706763700614_3812462636294917183_n-removebg-preview.png" alt="Logo" style="height:40px;width:80px;object-fit:contain;border-radius:50%;" />
+      <a href="index.html" style="color:white;">Doraemon<span>.vn</span></a>
+    </div>
+    <div class="search-wrap">
+      <div class="search-box">
+        <input type="text" id="searchInput" placeholder="Tìm kiếm sách..." autocomplete="off" />
+        <button onclick="doSearch()">🔍</button>
+      </div>
+      <div class="search-result" id="searchResult"></div>
+    </div>
+    <div class="header-right"><a href="#">Tài khoản ▾</a><a href="#">Giỏ hàng (0) ▾</a></div>
+  </div>
+</div>
+<div class="hotline-bar"><div class="hotline-inner">📞 Hotline: <strong>0979 761 345</strong></div></div>
+
+<!-- BREADCRUMB -->
+<div class="breadcrumb-bar" id="breadcrumbBar">
+  <div class="bc-inner" id="breadcrumbInner"><span id="jq-status" style="display:none;background:#e8f5e9;color:#2e7d32;border:1px solid #a5d6a7;border-radius:3px;padding:1px 8px;font-size:11px;font-weight:bold;margin-left:8px;"></span></div>
+</div>
+
+<!-- TRANG CHỦ -->
+<div id="homePage" class="home-page">
+  <div class="section-title">📚 Tất Cả Sách</div>
+  <div class="filter-tabs" id="filterTabs">
+    <button class="ftab active" data-key="all" onclick="filterBooks('all',this)">Tất cả</button>
+    <button class="ftab" data-key="kynang" onclick="filterBooks('kynang',this)">📖 Kỹ Năng Sống</button>
+    <button class="ftab" data-key="thieunhi" onclick="filterBooks('thieunhi',this)">🐱 Thiếu Nhi</button>
+    <button class="ftab" data-key="vienthuong" onclick="filterBooks('vienthuong',this)">🚀 Viễn Tưởng</button>
+  </div>
+  <div class="book-grid" id="bookGrid"></div>
+</div>
+
+<!-- TRANG CHI TIẾT -->
+<div id="detailPage" class="detail-page hidden">
+  <div class="chitiet-box">
+    <div class="anh-col"><img id="d-img" src="" alt="" /></div>
+    <div class="info-col">
+      <h1 id="d-ten"></h1>
+      <div class="stars">★★★★★ <span id="d-danhgia"></span></div>
+      <div class="tag-row" id="d-tags"></div>
+      <div class="gia-row">
+        <span class="gia-bia-label">Giá bìa: <span class="gia-bia-so" id="d-gia-bia"></span></span>
+        <span class="tiet-kiem-txt" id="d-tiet-kiem"></span>
+      </div>
+      <div class="gia-ban" id="d-gia-ban"></div>
+      <ul class="vc-list">
+        <li>Bọc Plastic theo yêu cầu</li>
+        <li>Giao hàng miễn phí nội thành đơn từ 200.000 đ</li>
+        <li>Giao hàng miễn phí toàn quốc đơn từ 350.000 đ</li>
+      </ul>
+      <ul class="meta-list" id="d-meta"></ul>
+      <button class="btn-dat">ĐẶT HÀNG NGAY</button>
+      <button class="btn-gio">🛒 Thêm vào giỏ</button>
+    </div>
+  </div>
+  <div class="mota-box">
+    <h2>Giới Thiệu Sách</h2>
+    <div id="d-mota"></div>
+  </div>
+  <div class="related-box">
+    <h2>Sách Liên Quan</h2>
+    <div class="related-grid" id="d-related"></div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  <div class="footer-inner">
+    <div class="footer-col"><h4>Hỗ Trợ Khách Hàng</h4><p>Email: <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="d3a0a6a3a3bca1a793b7bca1b2b6bebcbdb1bcbcb8fda5bd">[email&#160;protected]</a></p><p class="hl">Hotline: 0979 761 345</p></div>
+    <div class="footer-col"><h4>Danh Mục</h4>
+      <a onclick="showHome();filterBooks('kynang',null)">Sách Kỹ Năng</a>
+      <a onclick="showHome();filterBooks('thieunhi',null)">Sách Thiếu Nhi</a>
+      <a onclick="showHome();filterBooks('vienthuong',null)">Sách Viễn Tưởng</a>
+    </div>
+    <div class="footer-col"><h4>Tài Khoản</h4><a href="#">Đăng nhập</a><a href="#">Đăng ký</a></div>
+    <div class="footer-col"><h4>Hướng Dẫn</h4><a href="#">Hướng dẫn mua hàng</a><a href="#">Chính sách vận chuyển</a></div>
+  </div>
+  <div class="footer-bottom">Copyright © 2025 DoraemonBook | 123 Trường Chinh</div>
+</div>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+var BOOKS = [{"id": "dac-nhan-tam", "ten": "Đắc Nhân Tâm", "tac_gia": "Dale Carnegie", "dich_gia": "Nguyễn Văn Phước", "nxb": "NXB Tổng hợp TP.HCM", "the_loai_label": "Kỹ Năng Sống", "the_loai_key": "kynang", "so_trang": 320, "gia_bia": 85000, "gia_ban": 68000, "giam": 20, "img": "https://tiemsach.org/wp-content/uploads/2023/07/Ebook-Dac-nhan-tam.jpg", "mota_ngan": "Nguyên tắc giao tiếp và xây dựng mối quan hệ kinh điển của mọi thời đại.", "mota_html": "<p><strong>Đắc Nhân Tâm</strong> (tên gốc: <em>How to Win Friends and Influence People</em>) là cuốn sách nổi tiếng nhất của <strong>Dale Carnegie</strong>, xuất bản lần đầu năm 1936. Đây là một trong những cuốn sách bán chạy nhất mọi thời đại với hơn 30 triệu bản được bán ra trên toàn thế giới.</p>\n<p>Cuốn sách cung cấp những nguyên tắc giúp bạn cải thiện kỹ năng giao tiếp, xây dựng mối quan hệ tốt đẹp và tạo ảnh hưởng tích cực đến người khác. Nội dung được đúc kết từ hàng nghìn câu chuyện thực tế và bài học lịch sử.</p>\n<p>Sách chia thành 4 phần: cách gây thiện cảm, cách thuyết phục người khác, cách thay đổi người khác không gây mâu thuẫn, và cách trở thành nhà lãnh đạo được yêu quý.</p>\n<p><strong>Thông tin chi tiết:</strong></p>\n<ul><li>Tác giả: Dale Carnegie | Dịch giả: Nguyễn Văn Phước</li><li>Thể loại: Kỹ năng sống – Phát triển bản thân</li><li>Khổ sách: 13 × 20.5 cm | Số trang: 320</li><li>NXB: NXB Tổng hợp TP.HCM</li><li>Giá bìa: 85.000 VNĐ</li></ul>"}, 
+{"id": "atomic-habits", "ten": "Atomic Habits", "tac_gia": "James Clear", "dich_gia": "", "nxb": "NXB Lao Động", "the_loai_label": "Phát Triển Bản Thân", "the_loai_key": "kynang", "so_trang": 320, "gia_bia": 131000, "gia_ban": 105000, "giam": 20, "img": "https://jamesclear.com/wp-content/uploads/2019/04/atomicHC-flat-1-e1556572683325.jpg", "mota_ngan": "Hệ thống 4 quy tắc xây dựng thói quen tốt và loại bỏ thói quen xấu hiệu quả.", "mota_html": "<p><strong>Atomic Habits</strong> (Thay Đổi Tí Hon – Hiệu Quả Bất Ngờ) là cuốn sách nổi tiếng của <strong>James Clear</strong>, tập trung vào việc xây dựng thói quen tốt và loại bỏ thói quen xấu thông qua những thay đổi nhỏ nhưng mang lại hiệu quả lớn theo thời gian.</p>\n<p>Cuốn sách đưa ra hệ thống <strong>\"4 quy tắc thay đổi hành vi\"</strong>: làm cho thói quen trở nên rõ ràng, hấp dẫn, dễ thực hiện và thỏa mãn. Nội dung dựa trên khoa học hành vi, tâm lý học và các nghiên cứu thực tế.</p>\n<p>Sách phù hợp cho những ai muốn cải thiện bản thân từng ngày, từ sức khỏe, công việc đến cuộc sống cá nhân.</p>\n<p><strong>Thông tin chi tiết:</strong></p>\n<ul><li>Tác giả: James Clear</li><li>Thể loại: Phát triển bản thân – Kỹ năng sống</li><li>Số trang: ~320 | NXB: NXB Lao Động</li><li>Giá bìa: 131.000 VNĐ</li></ul>"}, 
+{"id": "7-thoi-quen", "ten": "7 Thói Quen Người Thành Đạt", "tac_gia": "Stephen R. Covey", "dich_gia": "", "nxb": "NXB Trẻ", "the_loai_label": "Kỹ Năng Lãnh Đạo", "the_loai_key": "kynang", "so_trang": 400, "gia_bia": 137000, "gia_ban": 110000, "giam": 20, "img": "https://2.bp.blogspot.com/-fcZcxIJJrrM/WS1FoqI1YtI/AAAAAAAAG1Y/29WI2jDcRHkYcvJYm1F8E7-wJlUDlyWLwCLcB/s1600/the7habits.u5131.d20170407.t115643.302250.jpg", "mota_ngan": "7 nguyên tắc cốt lõi giúp đạt hiệu quả cao trong công việc và cuộc sống.", "mota_html": "<p><strong>7 Thói Quen Của Người Thành Đạt</strong> là tác phẩm nổi tiếng của <strong>Stephen R. Covey</strong>, cung cấp các nguyên tắc cốt lõi giúp đạt hiệu quả cao trong công việc và cuộc sống.</p>\n<p>Cuốn sách xoay quanh 7 thói quen quan trọng: Chủ động, Bắt đầu với mục tiêu cuối, Ưu tiên việc quan trọng, Tư duy cùng thắng, Lắng nghe để thấu hiểu, Hợp lực sáng tạo và Tự làm mới bản thân.</p>\n<p>Đây là tác phẩm kinh điển được hàng triệu người trên thế giới tin dùng và áp dụng trong sự nghiệp lẫn cuộc sống cá nhân.</p>\n<p><strong>Thông tin chi tiết:</strong></p>\n<ul><li>Tác giả: Stephen R. Covey</li><li>Thể loại: Phát triển bản thân – Kỹ năng lãnh đạo</li><li>Số trang: ~400 | NXB: NXB Trẻ</li><li>Giá bìa: 137.000 VNĐ</li></ul>"}, 
+{"id": "mindset", "ten": "Mindset – Tư Duy Thành Công", "tac_gia": "Carol S. Dweck", "dich_gia": "", "nxb": "NXB Lao Động", "the_loai_label": "Tâm Lý Học", "the_loai_key": "kynang", "so_trang": 300, "gia_bia": 110000, "gia_ban": 88000, "giam": 20, "img": "https://sachnoi.top/upload/images/mindset-tam-ly-hoc-thanh-cong-50Zf4.webp", "mota_ngan": "Khái niệm 'tư duy phát triển' thay đổi cách bạn nhìn nhận thất bại và thành công.", "mota_html": "<p><strong>Mindset – Tư Duy Thành Công</strong> là cuốn sách nổi tiếng của <strong>Carol S. Dweck</strong>, giới thiệu khái niệm <em>\"tư duy phát triển\"</em> (growth mindset).</p>\n<p>Tác phẩm giúp người đọc hiểu được sự khác biệt giữa tư duy cố định và tư duy phát triển, từ đó thay đổi cách nhìn nhận thất bại, học hỏi và phát triển bản thân.</p>\n<p>Dựa trên nhiều thập kỷ nghiên cứu tâm lý học, cung cấp những công cụ thực tiễn để áp dụng trong học tập, công việc và cuộc sống hàng ngày.</p>\n<p><strong>Thông tin chi tiết:</strong></p>\n<ul><li>Tác giả: Carol S. Dweck</li><li>Thể loại: Tâm lý học – Phát triển bản thân</li><li>Số trang: ~300 | NXB: NXB Lao Động</li><li>Giá bìa: 110.000 VNĐ</li></ul>"}, 
+{"id": "nguoi-giau-nhat", "ten": "Người Giàu Nhất Thành Babylon", "tac_gia": "George S. Clason", "dich_gia": "", "nxb": "NXB Tổng Hợp TP.HCM", "the_loai_label": "Tài Chính Cá Nhân", "the_loai_key": "kynang", "so_trang": 200, "gia_bia": 72000, "gia_ban": 58000, "giam": 19, "img": "https://lzd-img-global.slatic.net/g/p/3f6ae6f3de8aaf9f354c4c5096a9d96a.png_720x720q80.png", "mota_ngan": "Nguyên tắc quản lý tài chính qua những câu chuyện ngụ ngôn Babylon cổ đại.", "mota_html": "<p><strong>Người Giàu Nhất Thành Babylon</strong> là tác phẩm tài chính cá nhân nổi tiếng của <strong>George S. Clason</strong>, xuất bản lần đầu năm 1926.</p>\n<p>Cuốn sách truyền tải các nguyên tắc quản lý tài chính thông qua những câu chuyện ngụ ngôn lấy bối cảnh Babylon cổ đại. Những bài học về tiết kiệm, đầu tư, quản lý tiền bạc được trình bày đơn giản nhưng cực kỳ hiệu quả.</p>\n<p>Đây là cuốn sách nền tảng dành cho bất kỳ ai muốn xây dựng tư duy tài chính vững chắc.</p>\n<p><strong>Thông tin chi tiết:</strong></p>\n<ul><li>Tác giả: George S. Clason</li><li>Thể loại: Tài chính cá nhân – Phát triển bản thân</li><li>Số trang: ~200 | NXB: NXB Tổng Hợp TP.HCM</li><li>Giá bìa: 72.000 VNĐ</li></ul>"}, 
+{"id": "doraemon-tap1", "ten": "Doraemon – Tập 1", "tac_gia": "Fujiko F. Fujio", "dich_gia": "", "nxb": "NXB Kim Đồng", "the_loai_label": "Manga – Thiếu Nhi", "the_loai_key": "thieunhi", "so_trang": 180, "gia_bia": 31000, "gia_ban": 25000, "giam": 19, "img": "https://sachvuii.com/wp-content/uploads/2024/10/iNkARZiAyX.webp", "mota_ngan": "Tập mở đầu cuộc phiêu lưu của chú mèo máy Doraemon và cậu bé Nobita.", "mota_html": "<p><strong>Doraemon Tập 1</strong> là tập mở đầu của bộ truyện tranh nổi tiếng đến từ Nhật Bản, được sáng tác bởi <strong>Fujiko F. Fujio</strong>.</p>\n<p>Câu chuyện xoay quanh chú mèo máy Doraemon đến từ tương lai và cậu bé hậu đậu Nobita. Với những bảo bối thần kỳ, Doraemon giúp Nobita vượt qua những rắc rối trong cuộc sống, đồng thời mang đến những bài học ý nghĩa về tình bạn, gia đình và sự cố gắng.</p>\n<p>Tập 1 giới thiệu các nhân vật chính và mở ra thế giới đầy sáng tạo, hài hước nhưng cũng rất nhân văn.</p>\n<p><strong>Thông tin chi tiết:</strong></p>\n<ul><li>Tác giả: Fujiko F. Fujio</li><li>Thể loại: Truyện tranh – Manga</li><li>Số trang: ~180 | NXB: NXB Kim Đồng</li><li>Giá bìa: 31.000 VNĐ</li></ul>"}, 
+{"id": "nobita-khung-long", "ten": "Nobita Và Chú Khủng Long", "tac_gia": "Fujiko F. Fujio", "dich_gia": "", "nxb": "NXB Kim Đồng", "the_loai_label": "Truyện Tranh – Phiêu Lưu", "the_loai_key": "thieunhi", "so_trang": 200, "gia_bia": 60000, "gia_ban": 48000, "giam": 20, "img": "https://tse4.mm.bing.net/th/id/OIP.du_EovpT_Q9hYwf1muaMHAHaKF?pid=Api&P=0&h=180", "mota_ngan": "Hành trình Nobita nuôi khủng long và đưa nó về thời tiền sử đầy cảm động.", "mota_html": "<p><strong>Nobita Và Chú Khủng Long</strong> là một trong những câu chuyện dài nổi bật trong series Doraemon của <strong>Fujiko F. Fujio</strong>.</p>\n<p>Nội dung kể về hành trình Nobita nuôi dưỡng một chú khủng long từ trứng hóa thạch và sau đó cùng Doraemon đưa nó trở về thời tiền sử. Cuộc phiêu lưu đầy cảm xúc này mang đến thông điệp sâu sắc về tình bạn, lòng dũng cảm và trách nhiệm.</p>\n<p>Đây là một trong những tập truyện được yêu thích nhất nhờ cốt truyện cảm động và giàu tính nhân văn.</p>\n<p><strong>Thông tin chi tiết:</strong></p>\n<ul><li>Tác giả: Fujiko F. Fujio</li><li>Thể loại: Truyện tranh – Phiêu lưu</li><li>Số trang: ~200 | NXB: NXB Kim Đồng</li><li>Giá bìa: 60.000 VNĐ</li></ul>"}, 
+{"id": "doraemon-plus-tap1", "ten": "Doraemon Plus – Tập 1", "tac_gia": "Fujiko F. Fujio", "dich_gia": "", "nxb": "NXB Kim Đồng", "the_loai_label": "Manga – Thiếu Nhi", "the_loai_key": "thieunhi", "so_trang": 180, "gia_bia": 35000, "gia_ban": 28000, "giam": 20, "img": "https://tse1.mm.bing.net/th/id/OIP.sud0Zsi0NjPAPM9w735sWAHaHa?pid=Api&P=0&h=180", "mota_ngan": "Tuyển tập câu chuyện bên lề hiếm có, góc nhìn mới mẻ về thế giới Doraemon.", "mota_html": "<p><strong>Doraemon Plus Tập 1</strong> là tuyển tập các câu chuyện ngắn đặc biệt của Doraemon, cũng do <strong>Fujiko F. Fujio</strong> sáng tác.</p>\n<p>Khác với mạch truyện chính, Doraemon Plus tập hợp những câu chuyện bên lề ít được xuất bản trước đó, mang đến góc nhìn mới mẻ và thú vị về các nhân vật quen thuộc.</p>\n<p>Phù hợp cho fan lâu năm muốn khám phá thêm những nội dung hiếm và độc đáo của Doraemon.</p>\n<p><strong>Thông tin chi tiết:</strong></p>\n<ul><li>Tác giả: Fujiko F. Fujio</li><li>Thể loại: Truyện tranh – Manga</li><li>Số trang: ~180 | NXB: NXB Kim Đồng</li><li>Giá bìa: 35.000 VNĐ</li></ul>"}, 
+{"id": "dune", "ten": "Dune – Xứ Cát", "tac_gia": "Frank Herbert", "dich_gia": "", "nxb": "NXB Văn Học", "the_loai_label": "Khoa Học Viễn Tưởng", "the_loai_key": "vienthuong", "so_trang": 600, "gia_bia": 181000, "gia_ban": 145000, "giam": 20, "img": "https://bizweb.dktcdn.net/100/180/408/products/xu-cat-01-94ed06ca-c6ce-4bad-bf1b-b26dd155aeda-effa208e-ef6d-429a-9655-b5952f46de3e.jpg?v=1638598294267", "mota_ngan": "Sử thi viễn tưởng kinh điển về quyền lực, tôn giáo và sinh tồn trên hành tinh sa mạc.", "mota_html": "<p><strong>Dune</strong> (Xứ Cát) là tiểu thuyết khoa học viễn tưởng kinh điển của <strong>Frank Herbert</strong>, lần đầu xuất bản năm 1965. Tác phẩm được xem là một trong những cuốn sci-fi vĩ đại nhất mọi thời đại.</p>\n<p>Câu chuyện xoay quanh hành tinh sa mạc Arrakis – nơi duy nhất có \"melange\" (gia vị quý hiếm), và hành trình của <strong>Paul Atreides</strong> trong cuộc chiến quyền lực, chính trị và sinh tồn.</p>\n<p>Sách không chỉ hấp dẫn về mặt cốt truyện mà còn chứa đựng những triết lý sâu sắc về quyền lực, tôn giáo và môi trường.</p>\n<p><strong>Thông tin chi tiết:</strong></p>\n<ul><li>Tác giả: Frank Herbert</li><li>Thể loại: Khoa học viễn tưởng</li><li>Số trang: ~500–700 | NXB: NXB Văn Học</li><li>Giá bìa: 181.000 VNĐ</li></ul>"},
+{"id": "foundation", "ten": "Foundation – Tổ Chức", "tac_gia": "Isaac Asimov", "dich_gia": "", "nxb": "NXB Văn Học", "the_loai_label": "Khoa Học Viễn Tưởng", "the_loai_key": "vienthuong", "so_trang": 280, "gia_bia": 150000, "gia_ban": 120000, "giam": 20, "img": "https://strangerthansf.com/scans/asimov-foundation.jpg", "mota_ngan": "Nhà khoa học Hari Seldon dùng 'tâm lý sử học' để định hình tương lai nhân loại.", "mota_html": "<p><strong>Foundation</strong> (Tổ Chức) là tác phẩm khoa học viễn tưởng kinh điển của <strong>Isaac Asimov</strong>, mở đầu cho series Foundation nổi tiếng.</p>\n<p>Câu chuyện xoay quanh nhà khoa học Hari Seldon – người đã phát triển \"tâm lý sử học\" để dự đoán tương lai của đế chế. Nhằm bảo tồn tri thức và rút ngắn thời kỳ suy tàn, ông lập ra tổ chức Foundation.</p>\n<p>Cuốn sách nổi bật với các yếu tố chính trị, khoa học và triết lý sâu sắc về lịch sử và tương lai nhân loại.</p>\n<p><strong>Thông tin chi tiết:</strong></p>\n<ul><li>Tác giả: Isaac Asimov</li><li>Thể loại: Khoa học viễn tưởng</li><li>Số trang: ~250–300 | NXB: NXB Văn Học</li><li>Giá bìa: 150.000 VNĐ</li></ul>"}, 
+{"id": "1984", "ten": "1984", "tac_gia": "George Orwell", "dich_gia": "", "nxb": "NXB Hội Nhà Văn", "the_loai_label": "Dystopia – Tiểu Thuyết", "the_loai_key": "vienthuong", "so_trang": 300, "gia_bia": 106000, "gia_ban": 85000, "giam": 20, "img": "https://tse4.mm.bing.net/th/id/OIP.Og8IPTwsuYG8j2iMOmcF_gHaLU?pid=Api&P=0&h=180", "mota_ngan": "Lời cảnh báo về xã hội toàn trị nơi Big Brother kiểm soát mọi suy nghĩ con người.", "mota_html": "<p><strong>1984</strong> là tiểu thuyết dystopian nổi tiếng của <strong>George Orwell</strong>, xuất bản năm 1949.</p>\n<p>Tác phẩm mô tả một xã hội toàn trị nơi mọi hành vi và suy nghĩ của con người đều bị giám sát bởi \"Big Brother\". Nhân vật chính Winston Smith bắt đầu nghi ngờ và chống lại hệ thống kiểm soát này.</p>\n<p>Cuốn sách là lời cảnh báo sâu sắc về quyền lực, sự kiểm soát và tự do cá nhân, vẫn còn nguyên giá trị cho đến ngày nay.</p>\n<p><strong>Thông tin chi tiết:</strong></p>\n<ul><li>Tác giả: George Orwell</li><li>Thể loại: Tiểu thuyết – Chính trị – Dystopia</li><li>Số trang: ~300 | NXB: NXB Hội Nhà Văn</li><li>Giá bìa: 106.000 VNĐ</li></ul>"},
+{"id": "crayon-shinchan-tap1", "ten": "Crayon Shin-chan – Cậu Bé Bút Chì Tập 1", "tac_gia": "Yoshito Usui", "dich_gia": "", "nxb": "NXB Kim Đồng", "the_loai_label": "Manga – Hài Hước", "the_loai_key": "thieunhi", "so_trang": 160, "gia_bia": 32000, "gia_ban": 27000, "giam": 16, "img": "https://salt.tikicdn.com/ts/product/25/59/6a/33eb6c33290c8134177c4ac2ad781139.jpg", "mota_ngan": "Cuộc sống tinh nghịch đầy tiếng cười của cậu bé Shin cùng gia đình và bạn bè.", "mota_html": "<p><strong>Crayon Shin-chan – Cậu Bé Bút Chì Tập 1</strong> là tác phẩm nổi tiếng của <strong>Yoshito Usui</strong>, thuộc thể loại truyện tranh hài hước Nhật Bản.</p>\n<p>Cuốn sách xoay quanh cuộc sống thường ngày đầy tinh nghịch của cậu bé Shin cùng gia đình và bạn bè. Nội dung mang lại tiếng cười nhẹ nhàng nhưng cũng phản ánh những tình huống đời sống quen thuộc.</p>\n<p>Đây là một trong những bộ truyện tranh được yêu thích rộng rãi trên toàn thế giới.</p>\n<p><strong>Thông tin chi tiết:</strong></p>\n<ul><li>Tác giả: Yoshito Usui</li><li>Thể loại: Truyện tranh – Hài hước</li><li>Ngày xuất bản: 18/02/2026 | NXB: NXB Kim Đồng</li><li>Giá bìa: 32.000 VNĐ</li></ul>"},
+{"id": "pokemon-adventures-tap1", "ten": "Pokémon Adventures – Hành Trình Pokémon Tập 1", "tac_gia": "Hidenori Kusaka", "dich_gia": "", "nxb": "NXB Kim Đồng", "the_loai_label": "Truyện Tranh – Phiêu Lưu", "the_loai_key": "thieunhi", "so_trang": 192, "gia_bia": 35000, "gia_ban": 30000, "giam": 14, "img": "https://d28hgpri8am2if.cloudfront.net/book_images/onix/cvr9781974709649/pokemon-adventures-collectors-edition-vol-1-9781974709649_hr.jpg", "mota_ngan": "Hành trình khám phá thế giới Pokémon đầy hấp dẫn của các huấn luyện viên trẻ.", "mota_html": "<p><strong>Pokémon Adventures – Hành Trình Pokémon Tập 1</strong> của <strong>Hidenori Kusaka</strong> kể về hành trình khám phá thế giới Pokémon đầy hấp dẫn của các huấn luyện viên trẻ.</p>\n<p>Cuốn truyện không chỉ mang tính giải trí mà còn truyền tải tinh thần phiêu lưu, tình bạn và sự nỗ lực vượt qua thử thách.</p>\n<p><strong>Thông tin chi tiết:</strong></p>\n<ul><li>Tác giả: Hidenori Kusaka</li><li>Thể loại: Truyện tranh – Phiêu lưu</li><li>Ngày xuất bản: 25/01/2026 | NXB: NXB Kim Đồng</li><li>Giá bìa: 35.000 VNĐ</li></ul>"},
+{"id": "hyperion", "ten": "Hyperion – Sự Sụp Đổ Của Hyperion", "tac_gia": "Dan Simmons", "dich_gia": "", "nxb": "NXB Văn Học", "the_loai_label": "Khoa Học Viễn Tưởng", "the_loai_key": "vienthuong", "so_trang": 520, "gia_bia": 185000, "gia_ban": 150000, "giam": 19, "img": "https://images-na.ssl-images-amazon.com/images/I/91cI7fKu0vL.jpg", "mota_ngan": "Tiểu thuyết viễn tưởng vũ trụ tương lai kết hợp triết học, tôn giáo và khoa học.", "mota_html": "<p><strong>Hyperion – Sự Sụp Đổ Của Hyperion</strong> của <strong>Dan Simmons</strong> là tiểu thuyết khoa học viễn tưởng nổi tiếng, lấy bối cảnh vũ trụ tương lai với nhiều bí ẩn và xung đột.</p>\n<p>Tác phẩm kết hợp giữa yếu tố triết học, tôn giáo và khoa học, mang đến trải nghiệm đọc sâu sắc và hấp dẫn.</p>\n<p><strong>Thông tin chi tiết:</strong></p>\n<ul><li>Tác giả: Dan Simmons</li><li>Thể loại: Khoa học viễn tưởng</li><li>Ngày xuất bản: 20/10/2025 | NXB: NXB Văn Học</li><li>Giá bìa: 185.000 VNĐ</li></ul>"},
+{"id": "neuromancer", "ten": "Neuromancer – Kẻ Du Hành Không Gian Mạng", "tac_gia": "William Gibson", "dich_gia": "", "nxb": "NXB Văn Học", "the_loai_label": "Khoa Học Viễn Tưởng – Cyberpunk", "the_loai_key": "vienthuong", "so_trang": 310, "gia_bia": 160000, "gia_ban": 128000, "giam": 20, "img": "https://mlpnk72yciwc.i.optimole.com/cqhiHLc.IIZS~2ef73/w:auto/h:auto/q:75/https://bleedingcool.com/wp-content/uploads/2024/02/Neuromancer-Review-William-Gibson-CyberPunks.com_.jpg", "mota_ngan": "Tác phẩm đặt nền móng cho cyberpunk – thế giới công nghệ cao và không gian mạng.", "mota_html": "<p><strong>Neuromancer – Kẻ Du Hành Không Gian Mạng</strong> của <strong>William Gibson</strong> là một trong những tác phẩm đặt nền móng cho thể loại cyberpunk.</p>\n<p>Câu chuyện xoay quanh thế giới công nghệ cao, trí tuệ nhân tạo và không gian mạng, mang đến góc nhìn độc đáo về tương lai.</p>\n<p><strong>Thông tin chi tiết:</strong></p>\n<ul><li>Tác giả: William Gibson</li><li>Thể loại: Khoa học viễn tưởng – Cyberpunk</li><li>Ngày xuất bản: 08/07/2025 | NXB: NXB Văn Học</li><li>Giá bìa: 160.000 VNĐ</li></ul>"}];
+
+var DANH_MUC_LABEL = {
+  kynang: 'Sách Kỹ Năng',
+  thieunhi: 'Sách Thiếu Nhi',
+  vienthuong: 'Sách Viễn Tưởng'
+};
+
+function fmt(n) { return n.toLocaleString('vi-VN') + ' đ'; }
+
+// ── Gán dữ liệu động một lần ──
+BOOKS.forEach(function(b) {
+  b._luot   = Math.floor(Math.random()*1700)+400;
+  b._nam    = Math.random()<0.6 ? 2025 : 2024;
+  b._dagia  = Math.floor(Math.random()*900)+300;
+});
+
+// ── Render lưới sách ──
+var currentFilter = 'all';
+function filterBooks(key, btnEl) {
+  currentFilter = key;
+  if (btnEl) {
+    document.querySelectorAll('.ftab').forEach(function(b){ b.classList.remove('active'); });
+    btnEl.classList.add('active');
+  } else {
+    document.querySelectorAll('.ftab').forEach(function(b){
+      b.classList.toggle('active', b.dataset.key === key || (key==='all' && b.dataset.key==='all'));
+    });
+  }
+  renderGrid(key);
+}
+
+function renderGrid(key) {
+  var list = key === 'all' ? BOOKS : BOOKS.filter(function(b){ return b.the_loai_key === key; });
+  document.getElementById('bookGrid').innerHTML = list.map(function(b) {
+    return '<div class="book-card" onclick="showDetail(\'' + b.id + '\')">' +
+      '<div class="card-img">' +
+        '<img src="' + b.img + '" alt="' + b.ten + '" loading="lazy"/>' +
+        '<span class="card-badge">-' + b.giam + '%</span>' +
+      '</div>' +
+      '<div class="card-body">' +
+        '<div class="card-title">' + b.ten + '</div>' +
+        '<div class="card-author">' + b.tac_gia + '</div>' +
+        '<span class="card-cat">' + b.the_loai_label + '</span>' +
+        '<div class="card-desc">' + b.mota_ngan + '</div>' +
+      '</div>' +
+      '<div class="card-footer">' +
+        '<div><div class="card-price-orig">' + fmt(b.gia_bia) + '</div><div class="card-price-sale">' + fmt(b.gia_ban) + '</div></div>' +
+        '<button class="card-btn" onclick="event.stopPropagation();showDetail(\'' + b.id + '\')">Xem</button>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+// ── Hiện trang chủ ──
+function showHome() {
+  history.pushState(null, '', window.location.pathname);
+  document.getElementById('homePage').classList.remove('hidden');
+  document.getElementById('detailPage').classList.add('hidden');
+  document.getElementById('breadcrumbInner').innerHTML =
+    '<a onclick="showHome()">Trang chủ</a>';
+  document.title = 'DoraemonBook – Nhà Sách Online';
+  window.scrollTo(0,0);
+  renderGrid(currentFilter);
+}
+
+// ── Hiện trang chi tiết ──
+function showDetail(id) {
+  var b = BOOKS.find(function(x){ return x.id === id; });
+  if (!b) return;
+
+  // Ảnh + tiêu đề
+  document.getElementById('d-img').src = b.img;
+  document.getElementById('d-img').alt = b.ten;
+  document.getElementById('d-ten').textContent = b.ten;
+  document.getElementById('d-danhgia').textContent = b._dagia.toLocaleString('vi-VN') + ' đánh giá';
+
+  // Giá
+  var tietKiem = b.gia_bia - b.gia_ban;
+  document.getElementById('d-gia-bia').textContent = fmt(b.gia_bia);
+  document.getElementById('d-tiet-kiem').textContent = 'Tiết kiệm: ' + fmt(tietKiem) + ' (-' + b.giam + '%)';
+  document.getElementById('d-gia-ban').textContent = fmt(b.gia_ban);
+
+  // Tags
+  var hot = b._luot > 1000;
+  var tags = [];
+  if (hot) tags.push('<span class="tag tag-hot">🔥 Bán chạy (' + b._luot.toLocaleString('vi-VN') + ' lượt)</span>');
+  tags.push('<span class="tag tag-new">🆕 Sách mới ' + b._nam + '</span>');
+  tags.push('<span class="tag tag-sale">🏷️ Giảm ' + b.giam + '%</span>');
+  document.getElementById('d-tags').innerHTML = tags.join('');
+
+  // Meta
+  var meta = '';
+  meta += '<li><span class="lb">Tác giả:</span> <a>' + b.tac_gia + '</a></li>';
+  if (b.dich_gia) meta += '<li><span class="lb">Dịch giả:</span> ' + b.dich_gia + '</li>';
+  meta += '<li><span class="lb">Nhà xuất bản:</span> ' + b.nxb + '</li>';
+  meta += '<li><span class="lb">Thể loại:</span> <a onclick="showHome();filterBooks(\'' + b.the_loai_key + '\',null)">' + b.the_loai_label + '</a></li>';
+  meta += '<li><span class="lb">Số trang:</span> ' + b.so_trang + ' trang</li>';
+  meta += '<li><span class="lb">Năm xuất bản:</span> ' + b._nam + '</li>';
+  meta += '<li><span class="lb">Lượt mua:</span> <span class="highlight">' + b._luot.toLocaleString('vi-VN') + ' lượt</span></li>';
+  meta += '<li><span class="lb">Tình trạng:</span> Còn hàng</li>';
+  document.getElementById('d-meta').innerHTML = meta;
+
+  // Mô tả
+  document.getElementById('d-mota').innerHTML = b.mota_html;
+
+  // Breadcrumb
+  var dmLabel = DANH_MUC_LABEL[b.the_loai_key] || 'Sách';
+  document.getElementById('breadcrumbInner').innerHTML =
+    '<a onclick="showHome()">Trang chủ</a> » ' +
+    '<a onclick="showHome();filterBooks(\'' + b.the_loai_key + '\',null)">' + dmLabel + '</a> » ' +
+    '<strong>' + b.ten + '</strong>';
+
+  // Sách liên quan (cùng danh mục, loại trừ chính nó, tối đa 6)
+  var related = BOOKS.filter(function(x){ return x.the_loai_key === b.the_loai_key && x.id !== b.id; }).slice(0,6);
+  document.getElementById('d-related').innerHTML = related.map(function(r) {
+    return '<div class="related-card" onclick="showDetail(\'' + r.id + '\')">' +
+      '<img src="' + r.img + '" alt="' + r.ten + '" loading="lazy"/>' +
+      '<div class="rc-body"><div class="rc-title">' + r.ten + '</div><div class="rc-price">' + fmt(r.gia_ban) + '</div></div>' +
+    '</div>';
+  }).join('') || '<p style="color:#888;font-size:12px">Không có sách liên quan.</p>';
+
+  // Hiện/ẩn page
+  history.pushState(null, '', '#' + id);
+  document.getElementById('homePage').classList.add('hidden');
+  document.getElementById('detailPage').classList.remove('hidden');
+  document.title = b.ten + ' – DoraemonBook';
+  window.scrollTo(0,0);
+}
+
+// ── Tìm kiếm ──
+var inp = document.getElementById('searchInput');
+var res = document.getElementById('searchResult');
+inp.addEventListener('input', function() {
+  var q = this.value.trim().toLowerCase();
+  if (!q) { res.classList.remove('show'); return; }
+  var f = BOOKS.filter(function(b) {
+    return b.ten.toLowerCase().indexOf(q) >= 0 || b.tac_gia.toLowerCase().indexOf(q) >= 0 || b.the_loai_label.toLowerCase().indexOf(q) >= 0;
+  });
+  res.innerHTML = f.length
+    ? f.map(function(b) {
+        return '<div class="sr-item" onclick="showDetail(\'' + b.id + '\');res.classList.remove(\'show\');inp.value=\'\';">' +
+          '<img src="' + b.img + '" alt="' + b.ten + '"/>' +
+          '<div><div class="sr-ten">' + b.ten + '</div>' +
+          '<div style="font-size:11px;color:#888">' + b.tac_gia + '</div>' +
+          '<div class="sr-gia">' + fmt(b.gia_ban) + '</div></div>' +
+        '</div>';
+      }).join('')
+    : '<div class="sr-no">Không tìm thấy sách phù hợp</div>';
+  res.classList.add('show');
+});
+document.addEventListener('click', function(e) {
+  if (!inp.contains(e.target) && !res.contains(e.target)) res.classList.remove('show');
+});
+function doSearch() {
+  if (inp.value.trim()) inp.dispatchEvent(new Event('input'));
+}
+
+// ── Đọc hash khi mở trang, hỗ trợ nút Back/Forward ──
+window.addEventListener('popstate', function() {
+  var hash = window.location.hash.replace('#', '');
+  if (hash) {
+    var found = BOOKS.find(function(b) { return b.id === hash; });
+    if (found) { showDetail(hash); return; }
+  }
+  showHome();
+});
+
+(function() {
+  var hash = window.location.hash.replace('#', '');
+  if (hash) {
+    var found = BOOKS.find(function(b) { return b.id === hash; });
+    if (found) { showDetail(hash); return; }
+  }
+  showHome();
+})();
+</script>
+
+<!-- JQUERY LIGHTBOX + EFFECTS -->
+<div id="jq-lightbox"><button id="jq-lightbox-close">✕</button><img id="jq-lightbox-img" src="" alt=""/></div>
+<button id="backToTop" title="Lên đầu trang" style="display:none;position:fixed;bottom:24px;right:20px;z-index:9999;background:#1a237e;color:white;border:none;border-radius:50%;width:40px;height:40px;font-size:20px;cursor:pointer;box-shadow:0 3px 10px rgba(0,0,0,0.25);">▲</button>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script>
+// ── EFFECT 1: Lightbox – click ảnh bìa để zoom ──
+$(document).on('click', '.anh-col img', function(){
+  var src = $(this).attr('src');
+  $('#jq-lightbox-img').attr('src', src);
+  $('#jq-lightbox').addClass('active');
+});
+$('#jq-lightbox-close, #jq-lightbox').on('click', function(e){
+  if(e.target === this) $('#jq-lightbox').removeClass('active');
+});
+$('#jq-lightbox img').on('click', function(e){ e.stopPropagation(); });
+
+// ── EFFECT 2: Back-to-top ──
+$(window).on('scroll', function(){
+  if($(this).scrollTop()>300) $('#backToTop').fadeIn(200);
+  else $('#backToTop').fadeOut(200);
+});
+$('#backToTop').on('click', function(){ $('html,body').animate({scrollTop:0},400); });
+$(document).ready(function(){
+  $('#jq-status').text('⚡ jQuery '+$.fn.jquery+' đang chạy').show();
+});
+// ── EFFECT 3: Scroll reveal sách liên quan ──
+$(window).on('scroll', function(){
+  $('.related-card').each(function(){
+    if(!$(this).hasClass('jq-seen') && $(this).offset().top < $(window).scrollTop()+$(window).height()+80){
+      $(this).addClass('jq-seen').hide().fadeIn(400);
+    }
+  });
+});
+</script>
+</body>
+</html>

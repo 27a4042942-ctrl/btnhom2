@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <title>Sách Kỹ Năng – DoraemonBook</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: Arial, sans-serif; font-size: 13px; color: #333; background: #f5f5f5; }
+    a { text-decoration: none; color: inherit; }
+    img { display: block; max-width: 100%; }
+    :root { --primary: #1a237e; --accent: #e53935; }
+    .header { background: var(--primary); }
+    .header-top { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; gap: 12px; padding: 8px 14px; }
+    .logo { color: white; font-size: 22px; font-weight: bold; white-space: nowrap; }
+    .logo span { color: #ffeb3b; }
+    .search-wrap { flex: 1; position: relative; }
+    .search-box { display: flex; }
+    .search-box input { flex: 1; padding: 7px 12px; border: none; border-radius: 3px 0 0 3px; font-size: 13px; outline: none; }
+    .search-box button { background: #e53935; color: white; border: none; padding: 7px 16px; border-radius: 0 3px 3px 0; cursor: pointer; }
+    .search-result { position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #ddd; border-top: none; z-index: 9999; display: none; box-shadow: 0 4px 12px rgba(0,0,0,0.15); max-height: 300px; overflow-y: auto; }
+    .search-result.show { display: block; }
+    .sr-item { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-bottom: 1px solid #f0f0f0; cursor: pointer; text-decoration: none; color: inherit; }
+    .sr-item:hover { background: #f5f5ff; }
+    .sr-item img { width: 36px; height: 46px; object-fit: cover; flex-shrink: 0; }
+    .sr-ten { font-size: 12px; font-weight: bold; color: #1a237e; }
+    .sr-gia { font-size: 12px; color: #e53935; font-weight: bold; }
+    .sr-no { padding: 12px; text-align: center; color: #888; }
+    .header-right { display: flex; gap: 14px; color: white; font-size: 12px; }
+    .header-right a { color: white; }
+    .hotline-bar { background: #f0f0f0; border-bottom: 1px solid #ddd; }
+    .hotline-inner { max-width: 1200px; margin: 0 auto; text-align: right; padding: 5px 14px; font-size: 13px; }
+    .hotline-inner strong { color: var(--primary); font-size: 15px; }
+    .breadcrumb-bar { background: white; border-bottom: 1px solid #eee; padding: 6px 0; }
+    .bc-inner { max-width: 1200px; margin: 0 auto; padding: 0 14px; font-size: 12px; color: #888; }
+    .bc-inner a { color: var(--primary); }
+    .main-wrap { max-width: 1200px; margin: 10px auto; padding: 0 14px; display: flex; gap: 10px; }
+    .sidebar { width: 200px; flex-shrink: 0; }
+    .sidebar-title { background: var(--primary); color: white; padding: 8px 12px; font-weight: bold; font-size: 12px; }
+    .sidebar ul { list-style: none; background: white; border: 1px solid #ddd; border-top: none; }
+    .sidebar ul li { border-bottom: 1px solid #f0f0f0; position: relative; }
+    .sidebar ul li > a { display: flex; justify-content: space-between; padding: 7px 12px; font-size: 12px; color: #333; }
+    .sidebar ul li > a:hover { color: var(--primary); background: #e8eaf6; }
+    .sidebar ul li.on > a { color: var(--primary); font-weight: bold; background: #e8eaf6; }
+    .submenu { display: none; position: absolute; left: 100%; top: 0; background: white; border: 1px solid #ddd; width: 160px; z-index: 500; box-shadow: 2px 2px 8px rgba(0,0,0,0.1); }
+    .sidebar ul li:hover .submenu { display: block; }
+    .submenu a { display: block; padding: 7px 12px; font-size: 12px; color: #333; border-bottom: 1px solid #f5f5f5; }
+    .submenu a:hover { color: var(--primary); background: #f0f4ff; }
+    .content { flex: 1; min-width: 0; }
+    .page-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; background: white; border: 1px solid #ddd; padding: 10px 14px; }
+    .page-head h1 { font-size: 16px; font-weight: bold; color: var(--primary); border-left: 4px solid var(--primary); padding-left: 10px; }
+    .page-head span { font-size: 12px; color: #888; }
+    .filter-tabs { display: flex; gap: 6px; margin-bottom: 10px; }
+    .tab-btn { background: white; border: 1px solid #ddd; padding: 5px 12px; border-radius: 3px; font-size: 12px; cursor: pointer; color: #555; }
+    .tab-btn:hover, .tab-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+    .sach-grid { display: flex; flex-wrap: wrap; gap: 10px; }
+    .sach-card { background: white; border: 1px solid #e0e0e0; border-radius: 3px; width: calc(25% - 8px); overflow: hidden; position: relative; transition: box-shadow 0.2s; }
+    .sach-card:hover { box-shadow: 0 3px 10px rgba(26,35,126,0.15); }
+    .badge { position: absolute; top: 0; left: 0; z-index: 1; background: #e53935; color: white; font-size: 10px; font-weight: bold; padding: 2px 5px; border-radius: 0 0 4px 0; }
+    .badge-hot { background: #ff6f00; }
+    .badge-new { background: #2e7d32; }
+    .sach-card img { width: 100%; height: 190px; object-fit: cover; }
+    .img-dacnhantam { height: 260px !important; object-fit: contain !important; object-position: center !important; background: #fff; }
+    .card-info { padding: 8px; }
+    .card-ten { font-size: 12px; font-weight: bold; height: 30px; overflow: hidden; margin-bottom: 2px; }
+    .card-ten a:hover { color: var(--primary); }
+    .card-tg { font-size: 11px; color: var(--primary); margin-bottom: 2px; }
+    .card-meta { font-size: 10px; color: #999; margin-bottom: 3px; }
+    .card-gia { font-size: 14px; font-weight: bold; color: #e53935; }
+    .card-gia-cu { font-size: 11px; color: #999; text-decoration: line-through; margin-bottom: 4px; }
+    .btn-xem { display: block; text-align: center; background: var(--primary); color: white; padding: 6px; border-radius: 2px; font-size: 12px; }
+    .btn-xem:hover { background: #0d1557; }
+    .phan-trang { display: flex; justify-content: center; gap: 5px; margin-top: 16px; padding-bottom: 6px; }
+    .phan-trang a { display: inline-block; padding: 5px 11px; background: white; border: 1px solid #ddd; border-radius: 2px; font-size: 12px; color: #333; cursor: pointer; }
+    .phan-trang a:hover, .phan-trang a.on { background: var(--primary); color: white; border-color: var(--primary); }
+    .footer { background: var(--primary); color: #ccc; margin-top: 14px; }
+    .footer-inner { max-width: 1200px; margin: 0 auto; display: flex; gap: 20px; padding: 20px 14px; }
+    .footer-col { flex: 1; }
+    .footer-col h4 { color: white; font-size: 13px; margin-bottom: 10px; border-bottom: 1px solid #3949ab; padding-bottom: 5px; }
+    .footer-col a, .footer-col p { display: block; font-size: 12px; color: #aab; margin-bottom: 4px; }
+    .footer-col a:hover { color: white; }
+    .footer-col .hl { color: #ffeb3b; font-weight: bold; font-size: 14px; }
+    .footer-bottom { text-align: center; background: #0d1557; padding: 8px; font-size: 12px; color: #888; }
+
+    /* JQUERY HIỆU ỨNG 1 – Scroll Reveal */
+    .sach-card {
+      opacity: 0;
+      transform: translateY(26px);
+      transition: opacity 0.42s ease, transform 0.42s ease, box-shadow 0.2s;
+    }
+    .sach-card.jq-revealed {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* JQUERY HIỆU ỨNG 2 – Back-to-top */
+    #jq-backtop {
+      display: none;
+      position: fixed; bottom: 26px; right: 22px; z-index: 9999;
+      width: 40px; height: 40px; border-radius: 50%;
+      background: var(--primary); color: white;
+      border: 2px solid rgba(255,255,255,0.3);
+      font-size: 17px; cursor: pointer;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.28);
+      transition: background 0.2s;
+    }
+    #jq-backtop:hover { background: #e53935; }
+
+    /* JQUERY HIỆU ỨNG 3 – Toast thông báo */
+    #jq-toast {
+      display: none;
+      position: fixed; top: 66px; right: 16px; z-index: 9999;
+      background: #1b5e20; color: white;
+      padding: 10px 15px 10px 12px; border-radius: 5px;
+      font-size: 12px; font-weight: bold;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.22);
+      max-width: 270px; border-left: 4px solid #69f0ae;
+    }
+    #jq-toast b { color: #b9f6ca; }
+
+    .jq-badge {
+      display: inline-block;
+      background: #e8f5e9; color: #2e7d32;
+      border: 1px solid #a5d6a7;
+      border-radius: 3px; padding: 1px 8px;
+      font-size: 11px; font-weight: bold; margin-left: 8px;
+      vertical-align: middle;
+    }
+  </style>
+</head>
+<body>
+<div class="header">
+  <div class="header-top">  
+    <div class="logo" style="display:flex;align-items:center;gap:8px;">
+       <img src="650830418_891706763700614_3812462636294917183_n-removebg-preview.png" alt="Logo" style="height:40px;width:80px;object-fit:contain;border-radius:50%;" />
+       <a href="index.html" style="color:white;">Doraemon<span>.vn</span></a>
+     </div>
+    <div class="search-wrap">
+      <div class="search-box">
+        <input type="text" id="searchInput" placeholder="Tìm kiếm sách..." autocomplete="off" />
+        <button>🔍</button>
+      </div>
+      <div class="search-result" id="searchResult"></div>
+    </div>
+    <div class="header-right"><a href="#">Tài khoản ▾</a><a href="#">Giỏ hàng (0) ▾</a></div>
+  </div>
+</div>
+
+<div class="hotline-bar"><div class="hotline-inner">📞 Hotline: <strong>0979 761 345</strong></div></div>
+
+<div class="breadcrumb-bar">
+  <div class="bc-inner">
+    <a href="index.html">Trang chủ</a> » <strong>Sách Kỹ Năng Sống</strong>
+    <span class="jq-badge" id="jq-badge-status">⏳ Đang tải jQuery...</span>
+  </div>
+</div>
+
+<div class="main-wrap">
+  <div class="sidebar">
+    <div class="sidebar-title">☰ DANH MỤC</div>
+    <ul>
+      <li>
+        <a href="#">Nổi bật <span>›</span></a>
+        <div class="submenu">
+          <a href="index.html">Sách bán chạy</a>
+          <a href="index.html">Sách mới</a>
+          <a href="index.html">Sắp phát hành</a>
+          <a href="index.html">Sách giảm giá</a>
+        </div>
+      </li>
+      <li class="on"><a href="sachkynang.html">Sách Kỹ Năng Sống</a></li>
+      <li><a href="sachthieunhi.html">Sách Thiếu Nhi</a></li>
+      <li><a href="sachvienthuong.html">Sách Viễn Tưởng</a></li>
+    </ul>
+  </div>
+  <div class="content">
+    <div class="page-head">
+      <h1>Sách Kỹ Năng Sống</h1>
+      <span id="soLuong">5 sản phẩm</span>
+    </div>
+    <div class="filter-tabs">
+      <div class="tab-btn active" onclick="filterTab('all',this)">Tất cả</div>
+      <div class="tab-btn" onclick="filterTab('hot',this)">🔥 Bán chạy</div>
+      <div class="tab-btn" onclick="filterTab('new',this)">🆕 Mới nhất (2026)</div>
+    </div>
+    <div class="sach-grid" id="sachGrid"></div>
+    <div class="phan-trang" id="phanTrang"></div>
+  </div>
+</div>
+<div class="footer">
+  <div class="footer-inner">
+    <div class="footer-col"><h4>Hỗ Trợ</h4><p>Email: 27a4042961@hvnh.edu.vn</p><p class="hl">Hotline: 0979 761 345</p></div>
+    <div class="footer-col"><h4>Danh Mục</h4><a href="sachkynang.html">Sách Kỹ Năng</a><a href="sachthieunhi.html">Sách Thiếu Nhi</a><a href="sachvienthuong.html">Sách Viễn Tưởng</a></div>
+    <div class="footer-col"><h4>Tài Khoản</h4><a href="#">Đăng nhập</a><a href="#">Đăng ký</a></div>
+    <div class="footer-col"><h4>Hướng Dẫn</h4><a href="#">Mua hàng</a><a href="#">Vận chuyển</a><a href="#">FAQ</a></div>
+  </div>
+  <div class="footer-bottom">Copyright © 2025 DoraemonBook | 123 Trường Chinh</div>
+</div>
+<script>
+var SACHS_KN = [
+  {ten:"Đắc Nhân Tâm",                tg:"Dale Carnegie",    gia:68000,  giaCu:85000,  img:"https://tiemsach.org/wp-content/uploads/2023/07/Ebook-Dac-nhan-tam.jpg", luotMua:1850, ngayXB:new Date(2026,1,10),link:"doraemonbook.html#dac-nhan-tam"},
+  {ten:"Atomic Habits",                tg:"James Clear",      gia:105000, giaCu:130000, img:"https://jamesclear.com/wp-content/uploads/2019/04/atomicHC-flat-1-e1556572683325.jpg", luotMua:1620, ngayXB:new Date(2026,0,5),link:"doraemonbook.html#atomic-habits"},
+  {ten:"7 Thói Quen Người Thành Đạt", tg:"Stephen R. Covey", gia:110000, giaCu:138000, img:"https://2.bp.blogspot.com/-fcZcxIJJrrM/WS1FoqI1YtI/AAAAAAAAG1Y/29WI2jDcRHkYcvJYm1F8E7-wJlUDlyWLwCLcB/s1600/the7habits.u5131.d20170407.t115643.302250.jpg", luotMua:980,  ngayXB:new Date(2025,5,20),link:"doraemonbook.html#7-thoi-quen"},
+  {ten:"Mindset – Tư Duy Thành Công", tg:"Carol S. Dweck",   gia:88000,  giaCu:110000, img:"https://sachnoi.top/upload/images/mindset-tam-ly-hoc-thanh-cong-50Zf4.webp", luotMua:760,  ngayXB:new Date(2025,8,14),link:"doraemonbook.html#mindset"},
+  {ten:"Người Giàu Nhất Thành Babylon",tg:"George S. Clason", gia:58000,  giaCu:72000,  img:"https://lzd-img-global.slatic.net/g/p/3f6ae6f3de8aaf9f354c4c5096a9d96a.png_720x720q80.png", luotMua:1340, ngayXB:new Date(2025,11,3),link:"doraemonbook.html#nguoi-giau-nhat"}
+];
+var top4=SACHS_KN.slice().sort(function(a,b){return b.luotMua-a.luotMua;}).slice(0,4).map(function(s){return s.ten;});
+SACHS_KN.forEach(function(s){s.namXB=s.ngayXB.getFullYear();s.giamPct=Math.round((1-s.gia/s.giaCu)*100);s.isMoi=s.namXB===2026;s.isBanChay=top4.indexOf(s.ten)!==-1;});
+function fmt(n){return n.toLocaleString('vi-VN')+' đ';}
+function fmtDate(d){return d.getDate()+'/'+(d.getMonth()+1)+'/'+d.getFullYear();}
+var cur='all',curPage=1,PER=4;
+function getList(){if(cur==='hot')return SACHS_KN.filter(function(s){return s.isBanChay;});if(cur==='new')return SACHS_KN.filter(function(s){return s.isMoi;});return SACHS_KN;}
+function render(){
+  var list=getList(),total=list.length,totalP=Math.ceil(total/PER)||1;
+  if(curPage>totalP)curPage=1;
+  var items=list.slice((curPage-1)*PER,curPage*PER);
+  document.getElementById('soLuong').textContent=total+' sản phẩm';
+  document.getElementById('sachGrid').innerHTML=items.map(function(s){
+    var b=s.isBanChay?'<div class="badge badge-hot">🔥 HOT</div>':s.isMoi?'<div class="badge badge-new">🆕 MỚI</div>':'<div class="badge">-'+s.giamPct+'%</div>';
+    return '<div class="sach-card">'+b+'<a href="'+s.link+'"><img src="'+s.img+'" alt="'+s.ten+'"></a><div class="card-info"><div class="card-ten"><a href="'+s.link+'">'+s.ten+'</a></div><div class="card-tg">'+s.tg+'</div><div class="card-meta">📅 '+fmtDate(s.ngayXB)+' | 🛒 '+s.luotMua.toLocaleString()+' lượt mua</div><div class="card-gia">'+fmt(s.gia)+'</div><div class="card-gia-cu">'+fmt(s.giaCu)+'</div><a class="btn-xem" href="'+s.link+'">Xem chi tiết</a></div></div>';
+  }).join('');
+  if(typeof jqReveal === 'function') jqReveal();
+  var pt='<a onclick="changePage('+(curPage-1)+')">&#171; Trước</a>';
+  for(var i=1;i<=totalP;i++) pt+='<a onclick="changePage('+i+')" class="'+(i===curPage?'on':'')+'">'+i+'</a>';
+  pt+='<a onclick="changePage('+(curPage+1)+')" >Sau &#187;</a>';
+  document.getElementById('phanTrang').innerHTML=pt;
+}
+function changePage(p){var t=Math.ceil(getList().length/PER)||1;if(p<1||p>t)return;curPage=p;render();window.scrollTo(0,200);}
+function filterTab(type,el){cur=type;curPage=1;document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.remove('active');});el.classList.add('active');render();}
+render();
+var inp=document.getElementById('searchInput'),res=document.getElementById('searchResult');
+inp.addEventListener('input',function(){var q=this.value.trim().toLowerCase();if(!q){res.classList.remove('show');return;}var f=SACHS_KN.filter(function(s){return s.ten.toLowerCase().indexOf(q)>=0||s.tg.toLowerCase().indexOf(q)>=0;});res.innerHTML=f.length?f.map(function(s){return '<a class="sr-item" href="'+s.link+'"><img src="'+s.img+'" alt="'+s.ten+'"><div><div class="sr-ten">'+s.ten+'</div><div style="font-size:11px;color:#888">'+s.tg+'</div><div class="sr-gia">'+fmt(s.gia)+'</div></div></a>';}).join(''):'<div class="sr-no">Không tìm thấy</div>';res.classList.add('show');});
+document.addEventListener('click',function(e){if(!e.target.closest('.search-wrap'))res.classList.remove('show');});
+</script>
+
+<!-- HTML cho jQuery effect 2 & 3 -->
+<button id="jq-backtop" title="Lên đầu trang">▲</button>
+<div id="jq-toast">✅ Đã xem: <b id="jq-toast-ten">...</b></div>
+
+<!-- BƯỚC 1: Tải jQuery -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+<!-- BƯỚC 2: Code jQuery -->
+<script>
+/* ╔══════════════════════════════════════════════════════════╗
+   ║  JQUERY TRONG sachkynang.html – 3 HIỆU ỨNG              ║
+   ╚══════════════════════════════════════════════════════════╝ */
+
+function jqReveal() {
+  var winBot = $(window).scrollTop() + $(window).height();
+  $('.sach-card:not(.jq-revealed)').each(function(i) {
+    if ($(this).offset().top < winBot + 50) {
+      var $c = $(this);
+      setTimeout(function(){ $c.addClass('jq-revealed'); }, i * 85);
+    }
+  });
+}
+
+$(document).ready(function () {
+
+  $('#jq-badge-status')
+    .text('⚡ jQuery ' + $.fn.jquery + ' đang chạy')
+    .css({ background:'#e8f5e9', color:'#2e7d32', border:'1px solid #a5d6a7' });
+
+  /* ──────────────────────────────────────────────────────
+     JQUERY HIỆU ỨNG 1: SCROLL REVEAL
+     jQuery method: .each(), .offset(), .addClass()
+     Nhìn thấy: Card xuất hiện lần lượt khi cuộn đến
+  ────────────────────────────────────────────────────── */
+  $(window).on('scroll', jqReveal);
+  jqReveal();
+
+  /* ──────────────────────────────────────────────────────
+     JQUERY HIỆU ỨNG 2: BACK-TO-TOP BUTTON
+     jQuery method: .fadeIn(), .fadeOut(), .animate()
+     Nhìn thấy: Nút ▲ xuất hiện góc phải khi cuộn xuống
+  ────────────────────────────────────────────────────── */
+  $(window).on('scroll', function () {
+    if ($(this).scrollTop() > 300) {
+      $('#jq-backtop').fadeIn(250);
+    } else {
+      $('#jq-backtop').fadeOut(200);
+    }
+  });
+  $('#jq-backtop').on('click', function () {
+    $('html, body').animate({ scrollTop: 0 }, 380);
+  });
+
+  /* ──────────────────────────────────────────────────────
+     JQUERY HIỆU ỨNG 3: TOAST THÔNG BÁO KHI CLICK XEM
+     jQuery method: .on(), .text(), .slideDown(), .slideUp()
+     Nhìn thấy: Hộp xanh trượt xuất hiện khi click "Xem"
+  ────────────────────────────────────────────────────── */
+  $(document).on('click', '.btn-xem', function (e) {
+    e.preventDefault();
+    var tenSach = $(this).closest('.sach-card').find('.card-ten a').text();
+    var href    = $(this).attr('href');
+    $('#jq-toast-ten').text(tenSach);
+    $('#jq-toast')
+      .stop(true, true)
+      .slideDown(280)
+      .delay(2500)
+      .slideUp(280, function () {
+        if (href && href !== '#') window.location.href = href;
+      });
+  });
+
+});
+</script>
+</body>
+</html>
